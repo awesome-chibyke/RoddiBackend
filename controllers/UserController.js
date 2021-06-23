@@ -1,0 +1,80 @@
+const responseObject = require("./ViewController");
+const AuthenticationCode = require("../helpers/AuthenticationCode");
+const ErrorHandler = require("../helpers/ErrorHandler");
+const verifyToken = require("../helpers/AuthenticateLogin");
+const User = require("../model/User");
+const date = require("date-and-time");
+const SendWelcomeEmailAfterActivation = require("../Emails/SendWelcomeEmailAfterActivation");
+
+class UserController {
+  constructor() {
+    this.now = new Date();
+    this.responseObject = new responseObject();
+    this.AuthenticationCode = new AuthenticationCode();
+    this.User = new User();
+    this.SendWelcomeEmailAfterActivation =
+      new SendWelcomeEmailAfterActivation();
+  }
+
+  //activate the user account
+  async ActivateAccount(req, res) {
+    try {
+      //get values from the body
+      const email = req.body.email;
+      const token = req.body.token;
+      const token_type = req.body.token_type;
+
+      //select the user involved
+      let userObject = await this.User.selectOneUser([["email", "=", email]]);
+      if (userObject === false) {
+        throw new Error("Invalid User details supplied");
+      }
+      // token;
+      // token_type;
+      //verify the token provided
+      let tokenAuthentication =
+        await this.AuthenticationCode.verifyTokenValidity(
+          token,
+          token_type,
+          userObject
+        );
+      if (tokenAuthentication.status === false) {
+        this.responseObject.setMesageType(tokenAuthentication.message_type);
+        throw new Error(tokenAuthentication.message);
+      }
+
+      //confirm the user account
+      let currenctDate = date.format(this.now, "YYYY-MM-DD HH:mm:ss");
+      await this.User.updateUser({
+        unique_id: userObject.unique_id,
+        email_verification: currenctDate,
+        updated_at: currenctDate,
+      });
+
+      //send a successful account activation mail to the user
+      let welcomeEmail =
+        this.SendWelcomeEmailAfterActivation.sendMail(userObject);
+
+      this.responseObject.setStatus(true);
+      this.responseObject.setMessage("Account activation was successful");
+      res.json(this.responseObject.sendToView());
+
+      //send the
+    } catch (e) {
+      this.responseObject.setStatus(false);
+      this.responseObject.setMessage({ general_error: [ErrorHandler(e)] });
+      res.json(this.responseObject.sendToView());
+    }
+  }
+}
+
+module.exports = UserController;
+
+//user enters token on front end
+//token gets sent to backend with user email
+//with email get the user involved
+//use the user unique id and token to query the db
+//if null send throw an error to user that token is invalid
+//if it exists, check the time scale to make sure its less than 10mins
+//if its less than 10mins confirm the user and activate the account_verification_level
+//send a success message to the front end and notify the user via email
