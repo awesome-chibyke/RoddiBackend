@@ -11,6 +11,7 @@ class SendLoginAuthEmail {
   }
 
   async sendMail(userObject, token) {
+
     try {
       let settingsDetails = await DbActions.selectSingleRow("settings", {
         filteringConditions: [["id", "=", 1]],
@@ -29,7 +30,7 @@ class SendLoginAuthEmail {
 
       let mailSetup = MailSetups(
         userObject.email,
-        "Login Authentication ",
+        "Login Authentication",
         emailTemplate,
         settingsDetails
       );
@@ -49,29 +50,7 @@ class SendLoginAuthEmail {
       };
     }
 
-    //get the template for the mail
-    let emailTemplate = LoginAuthEmailTemplate(
-      "https://techocraft.com/img/logo.png",
-      settingsDetails.site_name,
-      userObject.first_name +
-        " " +
-        userObject.middle_name +
-        " " +
-        userObject.last_name,
-      activationCode.data,
-      settingsDetails.address1,
-      settingsDetails.site_url
-    );
 
-    let mailSetup = MailSetups(
-      userObject.email,
-      "Login Authentication ",
-      emailTemplate,
-      settingsDetails
-    );
-
-    let mailSender = await mailler(mailSetup);
-    return mailSender;
   }
 }
 

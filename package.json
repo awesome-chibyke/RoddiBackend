@@ -17,6 +17,7 @@
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "express-validator": "^6.10.0",
+    "fs": "0.0.1-security",
     "generate-unique-id": "^2.0.1",
     "jsonwebtoken": "^8.5.1",
     "knex": "^0.95.4",
@@ -27,6 +28,7 @@
     "qrcode": "^1.4.4",
     "speakeasy": "^2.0.0",
     "twilio": "^3.63.1",
+    "util": "^0.12.4",
     "validatorjs": "^3.22.1"
   }
 }

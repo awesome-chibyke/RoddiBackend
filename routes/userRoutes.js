@@ -136,23 +136,27 @@ router.post(
   }
 );
 
-let maxSize = 1000;
+let maxSize = 2000000;
 
 var upload = multer({ storage: storage('./files/government_id/'), fileFilter:fileFilter(['png', 'jpg', 'jpeg', 'gif']), limits: { fileSize: maxSize } });
 
 router.route("/upload_id_card")
 /* replace foo-bar with your form field-name verifyToken */
-    .post(upload.single("upload_id_card"), function(req, res){
+    .post(verifyToken, upload.single("upload_id_card"), function(req, res){
       EditProfileController.uploadIdCard(req, res);
     }, (error, req, res, next) => {
 
-  res.status(400).send({ error: error.message });
+    res.status(400).send({ error: error.message });
+    responseObject.setMessage({
+      general_error: [error.message],
+    });
+    res.json(responseObject.sendToView());
 
 })
 
 router.use(function (err, req, res, next) {
   //console.error(err.stack);
-  //responseObject.setStatus(false);
+  responseObject.setStatus(false);
   responseObject.setMessage({
     general_error: ["Token was not supplied, please login"],
   });

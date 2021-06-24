@@ -85,11 +85,12 @@ class User {
     return userObject;
   }
 
-  returnUserForView(userObj) {
+  async returnUserForView(userObj) {
     delete userObj.password;
     delete userObj.password;
     delete userObj.two_factor_temp_secret;
     delete userObj.two_factor_secret;
+    userObj.currency_details = await this.fetchUserCurrency(userObj.preferred_currency);
     return userObj;
   }
 
@@ -166,6 +167,13 @@ class User {
         data: [],
       };
     }
+  }
+
+  async fetchUserCurrency(CurrencyId){
+
+    return await this.DbActions.selectSingleRow("currency_rates_models", {
+      filteringConditions: [["unique_id", "=", CurrencyId]],
+    });
   }
 }
 
