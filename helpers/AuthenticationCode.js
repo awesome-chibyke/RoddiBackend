@@ -98,6 +98,7 @@ class AuthenticationCode {
           ["user_unique_id", "=", userObject.unique_id],
           ["token", "=", token],
           ["type", "=", token_type],
+          //["status", "=", "un-used"],
         ],
       });
 

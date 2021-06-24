@@ -5,6 +5,7 @@ const verifyToken = require("../helpers/AuthenticateLogin");
 const User = require("../model/User");
 const date = require("date-and-time");
 const SendWelcomeEmailAfterActivation = require("../Emails/SendWelcomeEmailAfterActivation");
+const jwt = require("jsonwebtoken");
 
 class UserController {
   constructor() {
@@ -55,9 +56,15 @@ class UserController {
       let welcomeEmail =
         this.SendWelcomeEmailAfterActivation.sendMail(userObject);
 
-      this.responseObject.setStatus(true);
-      this.responseObject.setMessage("Account activation was successful");
-      res.json(this.responseObject.sendToView());
+      //use jwt to create a token_type//create the jwt token and send to the view
+      jwt.sign({ user: userObject }, "secretkey", async (err, token) => {
+        this.responseObject.setMesageType("normal");
+        let userObjectForView = await this.User.returnUserForView(userObject);
+        this.responseObject.setData({ token: token, user: userObjectForView });
+        this.responseObject.setStatus(true);
+        this.responseObject.setMessage("Account activation was successful, you have been successfully logged in");
+        res.status(200).json(this.responseObject.sendToView());
+      });
 
       //send the
     } catch (e) {

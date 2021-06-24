@@ -30,8 +30,8 @@ const validationRule = {
 const validate = (req, res, next) => {
   validator(req.body, validationRule, {}, (err, status) => {
     if (!status) {
-      responseObject.setStatus(false);//err.errors
-      responseObject.setMessage(req.body);
+      responseObject.setStatus(false);//
+      responseObject.setMessage(err.errors);
       res.json(responseObject.sendToView());
     } else {
       next();
