@@ -2,6 +2,7 @@ const responseObject = require("./ViewController");
 const authData = require("../helpers/AuthenticateLogin");
 const ErrorHandler = require("../helpers/ErrorHandler");
 const AccountVerificationLevels = require("../helpers/AccountVerificationLevels");
+const IdUploadSuccessTemplate = require("../Emails/EmailTemplates/IdUploadSuccessTemplate");
 const User = require("../model/User");
 const date = require("date-and-time");
 
@@ -109,6 +110,8 @@ class EditController {
       });
 
       //send an email to the user that his
+      let fullName = this.User.returnFullName(userObject);
+      IdUploadSuccessTemplate(fullName,'');
 
       //send response to the view
       this.responseObject.setStatus(true);
