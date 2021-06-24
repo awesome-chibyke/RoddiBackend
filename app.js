@@ -9,7 +9,6 @@ const register = require("./routes/registerRoute");
 const home = require("./routes/DashboardRoute");
 const edit = require("./routes/userRoutes");
 const verify = require("./routes/verificationRoute");
-const validate = require("./routes/verificationRoute");
 
 //require cors
 var cors = require("cors");
@@ -26,7 +25,6 @@ app.use("/register", register);
 app.use("/home", home);
 app.use("/edit", edit); //house the edit user route, the account activation route for users, the activation of two factor auth
 app.use("/verify", verify);
-app.use("/validate", validate);
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
