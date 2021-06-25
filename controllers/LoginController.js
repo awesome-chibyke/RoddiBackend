@@ -87,6 +87,9 @@ class LoginController {
         }
         let token = activationCode.data;
         let sendMail = await this.SendLoginAuthMail.sendMail(user, token); //token
+        if(sendMail.status === false){
+          throw new Error(sendMail.message);
+        }
         // check if the user has verified phone to send login code to phone
         let successMessage =
           "A login authentication code was sent to your email address, please provide code to proceed with login";

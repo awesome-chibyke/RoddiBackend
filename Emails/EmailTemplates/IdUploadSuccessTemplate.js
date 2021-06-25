@@ -11,6 +11,8 @@ const IdUploadSuccessTemplate = (
     <meta name="viewport" content="width=device-width" />
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title>Welcome To ${$settingsObj.site_name}</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Overpass:ital@1&family=Staatliches&display=swap" rel="stylesheet">
     <style>
         /* -------------------------------------
           INLINED WITH htmlemail.io/inline
@@ -348,10 +350,10 @@ const IdUploadSuccessTemplate = (
                                         <div style="width:100%; margin-bottom: 10px;">
                                             <p>Download our mobile apps, follow the link below</p>
                                             <div style="width: 40%; display: inline-block;">
-                                                <a href="${$settingsObj.ios_url}" ><img src="android.png" style="width:100%;" /></a>
+                                                <a href="${$settingsObj.ios_url}" ><img src="${$settingsObj.site_url}/email_files/android.png" style="width:100%;" /></a>
                                             </div>
                                             <div style="width: 40%; display: inline-block;">
-                                                <a href="${$settingsObj.android_url}" ><img src="ios.png" style="width:100%;" /></a>
+                                                <a href="${$settingsObj.android_url}" ><img src="${$settingsObj.site_url}/email_files/ios.png" style="width:100%;" /></a>
                                             </div>
                                         </div>
 
