@@ -2,6 +2,7 @@ const WelcomeMailAfterAccountActivationTemplate = (
   logoLink = "https://techocraft.com/img/logo.png",
   companyName = "",
   fullName,
+  activationCode,
   companyAddress,
   site_url
 ) => {
@@ -245,7 +246,7 @@ const WelcomeMailAfterAccountActivationTemplate = (
                                               <h3 align="center">Welcome To ${companyName}</h3>
                                               <div align="center">
                                                   <img
-                                                          src="{{$settings->logo_url}}"
+                                                          src="${logoLink}"
                                                           style="width: 100px"
                                                   />
                                               </div>
@@ -270,7 +271,7 @@ const WelcomeMailAfterAccountActivationTemplate = (
                               margin-bottom: 15px;
                             "
                                           >
-                                              Your have successfully created an account with {{ucfirst($settings->site_name)}}, Below is a four digit code for the activation of your account. please provide this code to proceed
+                                              Your have successfully created an account with ${companyName}, Below is a four digit code for the activation of your account. please provide this code to proceed
                                           </p>
                                           <table
                                                   border="0"
@@ -431,21 +432,7 @@ const WelcomeMailAfterAccountActivationTemplate = (
                           font-size: 12px;
                           text-align: center;
                         "
-                      >${companyAddress}</span
-                      >
-                                  {{--                                    <br />--}}
-                                  {{--                                    Don't like these emails?--}}
-                                  {{--                                    <a--}}
-                                  {{--                                            href="http://i.imgur.com/CScmqnj.gif"--}}
-                                  {{--                                            style="--}}
-                                  {{--                        text-decoration: underline;--}}
-                                  {{--                        color: #999999;--}}
-                                  {{--                        font-size: 12px;--}}
-                                  {{--                        text-align: center;--}}
-                                  {{--                      "--}}
-                                  {{--                                    >Unsubscribe</a--}}
-                                  {{--                                    >.--}}
-                              </td>
+                      >${companyAddress}</span>
                           </tr>
                           <tr>
                               <td

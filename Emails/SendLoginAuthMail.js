@@ -19,6 +19,8 @@ class SendLoginAuthEmail {
 
       //get the template for the mail
       let fullName = this.User.returnFullName(userObject);
+      console.log(returnFullName)
+      console.log(fullName)
       let emailTemplate = LoginAuthEmailTemplate(
         settingsDetails.logo_url,
         settingsDetails.site_name,
