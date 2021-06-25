@@ -8,8 +8,7 @@ const SendWelcomeEmail = require("../Emails/SendWelcomeEmail");
 const ErrorHandler = require("../helpers/ErrorHandler");
 const MessageType = require("../helpers/MessageType");
 
-//instantiations
-
+//instantiation
 class RegisterController {
   constructor() {
     this.responseObject = new responseObject();

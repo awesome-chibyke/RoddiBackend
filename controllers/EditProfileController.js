@@ -1,21 +1,13 @@
 const responseObject = require("./ViewController");
 const authData = require("../helpers/AuthenticateLogin");
 const ErrorHandler = require("../helpers/ErrorHandler");
-const AccountVerificationLevels = require("../helpers/AccountVerificationLevels");
 const User = require("../model/User");
-const date = require("date-and-time");
-
-//file manager
-const fs = require('fs');
-const { promisify } = require('util');
-const unlinkAsync = promisify(fs.unlink);
 
 class EditController {
   constructor() {
     this.responseObject = new responseObject();
     this.User = new User();
     this.now = new Date();
-    this.AccountVerificationLevels = new AccountVerificationLevels();
   }
 
   async edit(req, res) {
@@ -73,56 +65,6 @@ class EditController {
     }
   }
 
-  async uploadIdCard(req, res){
-    try{
-
-      let userObject = await authData(req);
-      userObject = await this.User.selectOneUser([["unique_id", "=", userObject.user.unique_id]]);
-      if(userObject === false){
-        throw new Error('User not found');
-      }
-
-      if(userObject.id_upload_status === this.AccountVerificationLevels.id_upload_pending){
-        //unlink the file
-        await unlinkAsync(req.file.path);
-        throw new Error('your uploaded document is still under review');
-      }
-
-      if(userObject.id_upload_status === this.AccountVerificationLevels.id_upload_confirmed){
-        //unlink the file
-        await unlinkAsync(req.file.path);
-        throw new Error('your ID has been confirmed');
-      }
-
-      //show the user that file upload failed
-      if(typeof req.file === "undefined"){
-        throw new Error('File Upload failed');
-      }
-
-      //add the file to the db
-      let currenctDate = date.format(this.now, "YYYY-MM-DD HH:mm:ss");
-      await this.User.updateUser({
-        unique_id: userObject.unique_id,
-        id_upload_status: this.AccountVerificationLevels.id_upload_pending,
-        id_name: req.file.filename,
-        updated_at: currenctDate,
-      });
-
-      //send an email to the user that his
-
-      //send response to the view
-      this.responseObject.setStatus(true);
-      this.responseObject.setMessage("You have successfully uploaded your ID, please wait while we review the document");
-      res.json(this.responseObject.sendToView());
-
-    }catch(err){
-      this.responseObject.setStatus(false);
-      this.responseObject.setMessage({
-        general_error: [ErrorHandler(err)],
-      });
-      res.json(this.responseObject.sendToView());
-    }
-  }
-
 }
+
 module.exports = EditController;

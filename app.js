@@ -10,6 +10,7 @@ const home = require("./routes/DashboardRoute");
 const edit = require("./routes/userRoutes");
 const verify = require("./routes/verificationRoute");
 const resendActivationEmailRoute = require("./routes/resendActivationEmailRoute");
+const IdUploadRoute = require("./routes/IdUploadRoute");
 
 //require cors
 var cors = require("cors");
@@ -28,6 +29,7 @@ app.use("/edit", edit); //house the edit user route, the account activation rout
 app.use("/verify", verify);
 app.use("/activation", resendActivationEmailRoute);
 app.use("/activate_account", resendActivationEmailRoute);
+app.use("/identity_management", IdUploadRoute);
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);

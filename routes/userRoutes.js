@@ -3,12 +3,9 @@ let responseObject = require("../controllers/ViewController");
 let EditProfileController = require("../controllers/EditProfileController");
 let TwoFactorController = require("../controllers/TwoFactorController");
 let UserController = require("../controllers/UserController");
-const ErrorHandler = require("../helpers/ErrorHandler");
 const verifyToken = require("../helpers/CheckTokenExistense");
 let PhoneVerifyController = require("../controllers/PhoneVerifyController");
 const validator = require("../helpers/validator");
-const {storage, fileFilter, limits} = require('../helpers/FileUploadHelpers')
-let multer = require("multer");
 
 // Instantiate Functions
 EditProfileController = new EditProfileController();
@@ -92,16 +89,6 @@ router.use(
   validateTwoFactorAuthFinaleValues
 );
 
-router.use(function (err, req, res, next) {
-  console.error(err.stack);
-  //responseObject.setStatus(false);
-  responseObject.setMessage({
-    general_error: ["Token was not supplied, please login"],
-  });
-  responseObject.setMesageType("logout");
-  res.json(responseObject.sendToView());
-});
-
 router.use("/validate_phone", validatePhones);
 
 //call the edit user class
@@ -135,24 +122,6 @@ router.post(
     TwoFactorController.finalActivationForTwoFactor(req, res);
   }
 );
-
-let maxSize = 2000000;
-
-var upload = multer({ storage: storage('./files/government_id/'), fileFilter:fileFilter(['png', 'jpg', 'jpeg', 'gif']), limits: { fileSize: maxSize } });
-
-router.route("/upload_id_card")
-/* replace foo-bar with your form field-name verifyToken */
-    .post(verifyToken, upload.single("upload_id_card"), function(req, res){
-      EditProfileController.uploadIdCard(req, res);
-    }, (error, req, res, next) => {
-
-    res.status(400).send({ error: error.message });
-    responseObject.setMessage({
-      general_error: [error.message],
-    });
-    res.json(responseObject.sendToView());
-
-})
 
 router.use(function (err, req, res, next) {
   //console.error(err.stack);
