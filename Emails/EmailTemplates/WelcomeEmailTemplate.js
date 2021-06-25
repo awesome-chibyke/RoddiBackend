@@ -1,17 +1,18 @@
 const WelcomeEmailTemplate = (
-  logoLink = "https://techocraft.com/img/logo.png",
-  companyName = "",
-  fullName,
-  activationCode,
-  companyAddress,
-  site_url
+    fullName,
+    subject,
+    $settingsObj,
+    activationCode
+    
 ) => {
+    var $overPass = "'Overpass', sans-serif";
+    var $cursive = "'Indie Flower', cursive";
   return `<!DOCTYPE html>
   <html>
   <head>
       <meta name="viewport" content="width=device-width" />
       <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-      <title>Welcome To ${companyName}</title>
+      <title>Welcome To ${$settingsObj.site_name}</title>
       <style>
           /* -------------------------------------
             INLINED WITH htmlemail.io/inline
@@ -130,7 +131,7 @@ const WelcomeEmailTemplate = (
           visibility: hidden;
           width: 0;
         "
-  >Welcome To ${companyName}.</span
+  >Welcome To ${$settingsObj.site_name}.</span
   >
   <table
           border="0"
@@ -234,19 +235,19 @@ const WelcomeEmailTemplate = (
                                           >
   <!--           background-landscape.png                                 //ios_url,android_url-->
                                               <h2 style="text-align: left; text-transform: uppercase; font-family: '.$this->overPass.'; margin-bottom: 5px; padding-left: 10px; ">
-                                                  USD <span style="color:rgb(10, 4, 60);">COIN PROFIT</span>
+                                                  <span style="color:rgb(10, 4, 60);">${$settingsObj.site_name}</span>
                                               </h2>
                                               <h2 style="text-align: left; text-transform: uppercase; padding-left: 10px; font-family: '.$this->cursive.'; margin-top: 5px;">
-                                                  <span style="color:rgb(10, 4, 60);">SURE HOME</span> FOR INVESTORS</h2>
+                                                   ${$settingsObj.slogan === null ? '' : $settingsObj.slogan }</h2>
                                               <h4
                                                       style="text-align: center; text-transform: uppercase;">
                                                   Deposit Notification
                                               </h4>
   
-                                              <h3 align="center">Welcome To ${companyName}</h3>
+                                              <h3 align="center">${subject}</h3>
                                               <div align="center">
                                                   <img
-                                                          src="${logoLink}"
+                                                          src="${$settingsObj.logo_url}"
                                                           style="width: 100px"
                                                   />
                                               </div>
@@ -260,7 +261,7 @@ const WelcomeEmailTemplate = (
                               margin-bottom: 15px;
                             "
                                           >
-                                              Hi ${fullName},
+                                              Hi ${fullName === undefined ? '' : fullName},
                                           </p>
                                           <p
                                                   style="
@@ -271,7 +272,7 @@ const WelcomeEmailTemplate = (
                               margin-bottom: 15px;
                             "
                                           >
-                                              Your have successfully created an account with ${companyName}, Below is a four digit code for the activation of your account. please provide this code to proceed
+                                              Your have successfully created an account with ${$settingsObj.site_name}, Below is a four digit code for the activation of your account. please provide this code to proceed
                                           </p>
                                           <table
                                                   border="0"
@@ -380,7 +381,7 @@ const WelcomeEmailTemplate = (
                               margin-bottom: 15px;
                             "
                                           >
-                                              Regards! ${companyName}.
+                                              Regards! ${$settingsObj.site_name}.
                                           </p>
                                       </td>
                                   </tr>
@@ -432,7 +433,7 @@ const WelcomeEmailTemplate = (
                           font-size: 12px;
                           text-align: center;
                         "
-                      >${companyAddress}</span>
+                      >${$settingsObj.address1}</span>
                           </tr>
                           <tr>
                               <td
@@ -456,7 +457,7 @@ const WelcomeEmailTemplate = (
                           text-align: center;
                           text-decoration: none;
                         "
-                                  >${companyName}</a
+                                  >${$settingsObj.site_name}</a
                                   >.
                               </td>
                           </tr>

@@ -7,6 +7,7 @@ const DbActions = require("../model/DbActions");
 const SendWelcomeEmail = require("../Emails/SendWelcomeEmail");
 const ErrorHandler = require("../helpers/ErrorHandler");
 const MessageType = require("../helpers/MessageType");
+const User = require("../model/User");
 
 //instantiation
 class RegisterController {
@@ -18,6 +19,7 @@ class RegisterController {
     this.Generics = new Generics();
     this.passwordController = new PasswordHasher();
     this.MessageType = new MessageType();
+    this.User = new User();
   }
 
   async register(req, res) {
@@ -51,6 +53,7 @@ class RegisterController {
       //insert the values into the db
       var insertValue = await this.DbActions.insertData("users", [userObject]);
 
+      userObject = await this.User.selectOneUser([['unique_id', '=', userObject.unique_id]]);
       let sendMail = await this.SendWelcomeEmail.sendMail(userObject);
 
       this.responseObject.setStatus(true);
