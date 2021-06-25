@@ -3,11 +3,13 @@ var AuthenticationCode = require("../helpers/AuthenticationCode");
 var LoginAuthEmailTemplate = require("../Emails/EmailTemplates/LoginAuthMailTemplate");
 var mailler = require("../Emails/MailAccount");
 const MailSetups = require("../Emails/MailSetups");
+const User = require("../model/User");
 DbActions = new DbActions();
 
 class SendLoginAuthEmail {
   constructor() {
     this.AuthenticationCode = new AuthenticationCode();
+    this.User = new User();
   }
 
   async sendMail(userObject, token) {
@@ -19,6 +21,7 @@ class SendLoginAuthEmail {
 
       //get the template for the mail
       let fullName = this.User.returnFullName(userObject);
+
       let emailTemplate = LoginAuthEmailTemplate(
         settingsDetails.logo_url,
         settingsDetails.site_name,
@@ -36,6 +39,7 @@ class SendLoginAuthEmail {
       );
 
       let mailSender = await mailler(mailSetup);
+
       return {
         status: true,
         message:
@@ -46,7 +50,6 @@ class SendLoginAuthEmail {
       return {
         status: false,
         message: err,
-
       };
     }
 
