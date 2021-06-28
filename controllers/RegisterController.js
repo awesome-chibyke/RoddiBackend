@@ -1,6 +1,5 @@
 const responseObject = require("./ViewController");
 const PasswordHasher = require("../helpers/PasswordHasher");
-
 const Generics = require("../helpers/Generics");
 const AuthenticationCode = require("../helpers/AuthenticationCode");
 const date = require("date-and-time");
@@ -8,8 +7,9 @@ const DbActions = require("../model/DbActions");
 const SendWelcomeEmail = require("../Emails/SendWelcomeEmail");
 const ErrorHandler = require("../helpers/ErrorHandler");
 const MessageType = require("../helpers/MessageType");
+const User = require("../model/User");
 
-//instantiations
+//instantiation
 class RegisterController {
   constructor() {
     this.responseObject = new responseObject();
@@ -19,6 +19,7 @@ class RegisterController {
     this.Generics = new Generics();
     this.passwordController = new PasswordHasher();
     this.MessageType = new MessageType();
+    this.User = new User();
   }
 
   async register(req, res) {
@@ -27,8 +28,8 @@ class RegisterController {
       let password = req.body.password;
       let referral_id = req.body.referral_id;
       let uniqueIdDetails = await this.Generics.createUniqueId(
-          "users",
-          "unique_id"
+        "users",
+        "unique_id"
       );
 
       if (uniqueIdDetails.status === false) {
@@ -52,6 +53,7 @@ class RegisterController {
       //insert the values into the db
       var insertValue = await this.DbActions.insertData("users", [userObject]);
 
+      userObject = await this.User.selectOneUser([['unique_id', '=', userObject.unique_id]]);
       let sendMail = await this.SendWelcomeEmail.sendMail(userObject);
 
       this.responseObject.setStatus(true);

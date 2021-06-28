@@ -78,7 +78,6 @@ class LoginController {
 
       //check if the authentication type the user have selected
       if (user.auth_type === "email") {
-
         //create the activation code
         let activationCode = await this.AuthenticationCode.createActivationCode(
           user,
@@ -95,6 +94,7 @@ class LoginController {
         // check if the user has verified phone to send login code to phone
         let successMessage =
           "A login authentication code was sent to your email address, please provide code to proceed with login";
+          // check if the user has verified phone to send login code to phone
         if (user.phone_verification !== null) {
           //send the code to the user phone number
           let sendSms = await this.SendLoginAuthSms.sendPhone(user, token);
@@ -109,6 +109,7 @@ class LoginController {
         this.responseObject.setData({
           email: user.email
         });
+
       } else {
         //google auth
         this.responseObject.setMessage(
@@ -260,7 +261,6 @@ class LoginController {
       res.json(this.responseObject.sendToView());
     }
   }
-
 }
 
 module.exports = LoginController;

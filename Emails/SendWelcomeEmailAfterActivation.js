@@ -3,19 +3,19 @@ var AuthenticationCode = require("../helpers/AuthenticationCode");
 var WelcomeMailAfterAccountActivationTemplate = require("../Emails/EmailTemplates/WelcomeEmailAfterAccountActivationTemplate");
 var mailler = require("../Emails/MailAccount");
 const MailSetups = require("../Emails/MailSetups");
+const User = require("../model/User");
+const Settings = require("../model/Settings");
 
 AuthenticationCode = new AuthenticationCode();
 
 class SendWelcomeEmailAfterActivation {
   constructor() {
     this.DbActions = new DbActions();
+    this.User = new User();
+    this.Settings = new Settings();
   }
 
   async sendMail(userObject) {
-    let settingsDetails = await this.DbActions.selectSingleRow("settings", {
-      filteringConditions: [["id", "=", 1]],
-    });
-
     //create the activation code
     let activationCode = await AuthenticationCode.createActivationCode(
       userObject,
@@ -29,25 +29,31 @@ class SendWelcomeEmailAfterActivation {
       };
     }
 
+    let fullName = this.User.returnFullName(userObject);
+    console.log(fullName);
+
+    //select the system settings
+    let systemSettings = await this.Settings.selectSettings([["id", "=", 1]]);
+    //title message for the mail
+    const emailTitle = "Welcome To "+systemSettings.site_name;
+
+    if (systemSettings === false) {
+      throw new Error("System settings could not be retrieved");
+    } //show errror if the system settings cant be returned
+
     //get the template for the mail
     let emailTemplate = WelcomeMailAfterAccountActivationTemplate(
-      "https://techocraft.com/img/logo.png",
-      settingsDetails.site_name,
-      userObject.first_name +
-        " " +
-        userObject.middle_name +
-        " " +
-        userObject.last_name,
-      settingsDetails.address1,
-      settingsDetails.site_url
+      fullName,
+      emailTitle,
+      systemSettings,
     );
 
     //send a welcome/activation email to the user
     let mailSetup = MailSetups(
       userObject.email,
-      "Welcoome To " + settingsDetails.site_name,
+      emailTitle,
       emailTemplate,
-      settingsDetails
+      systemSettings,
     );
     let mailSender = await mailler(mailSetup);
     return mailSender;

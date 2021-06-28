@@ -75,7 +75,9 @@ class User {
     let firstName = userObject.first_name === null || userObject.first_name === '' ? '' : userObject.first_name;
     let middleName = userObject.middle_name === null || userObject.middle_name === '' ? '' : userObject.middle_name;
     let lastName = userObject.last_name === null || userObject.last_name === '' ? '' : userObject.last_name;
-    return firstName+' '+middleName+' '+lastName;
+    let fullName = firstName+' '+middleName+' '+lastName;
+    console.log(fullName);
+    return fullName;
   }
 
   async selectOneUser(conditions) {
