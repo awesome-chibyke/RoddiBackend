@@ -5,37 +5,41 @@ var mailler = require("../Emails/MailAccount");
 const MailSetups = require("../Emails/MailSetups");
 const User = require("../model/User");
 DbActions = new DbActions();
+const Settings = require("../model/Settings");
 
 class SendLoginAuthEmail {
   constructor() {
     this.AuthenticationCode = new AuthenticationCode();
     this.User = new User();
+    this.Settings = new Settings();
   }
 
   async sendMail(userObject, token) {
-
     try {
-      let settingsDetails = await DbActions.selectSingleRow("settings", {
-        filteringConditions: [["id", "=", 1]],
-      });
-
-      //get the template for the mail
       let fullName = this.User.returnFullName(userObject);
+      //select the system settings
+      let systemSettings = await this.Settings.selectSettings([["id", "=", 1]]);
+      //title message for the mail
+      const emailTitle = "Your Login Authentication Code To "+systemSettings.site_name;
+  
+      if (systemSettings === false) {
+        throw new Error("System settings could not be retrieved");
+      } //show errror if the system settings cant be returned
+
 
       let emailTemplate = LoginAuthEmailTemplate(
-        settingsDetails.logo_url,
-        settingsDetails.site_name,
         fullName,
+        emailTitle,
+        systemSettings,
         token,
-        settingsDetails.address1,
-        settingsDetails.site_url
       );
 
       let mailSetup = MailSetups(
         userObject.email,
-        "Login Authentication",
+        emailTitle,
         emailTemplate,
-        settingsDetails
+        systemSettings,
+        token
       );
 
       let mailSender = await mailler(mailSetup);
@@ -52,8 +56,6 @@ class SendLoginAuthEmail {
         message: err,
       };
     }
-
-
   }
 }
 
