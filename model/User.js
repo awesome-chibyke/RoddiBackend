@@ -60,6 +60,8 @@ class User {
       userObject.two_factor_temp_secret ?? user.two_factor_temp_secret;
     user.two_factor_secret =
       userObject.two_factor_secret ?? user.two_factor_secret;
+    user.document_number =
+      userObject.document_number ?? user.document_number;
 
     //update the user
     await this.DbActions.updateData("users", {

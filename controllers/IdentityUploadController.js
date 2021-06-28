@@ -6,6 +6,7 @@ const AccountVerificationLevels = require("../helpers/AccountVerificationLevels"
 const IdUploadSuccessTemplate = require("../Emails/EmailTemplates/IdUploadSuccessTemplate");
 const User = require("../model/User");
 const date = require("date-and-time");
+const validator = require("../helpers/validator");
 
 //import the mail managers
 var mailler = require("../Emails/MailAccount");
@@ -25,10 +26,35 @@ class IdentityUploadController {
         this.now = new Date();
         this.AccountVerificationLevels = new AccountVerificationLevels();
         this.Settings = new Settings();
+        this.errorMessage = '';
+    }
+
+    valdateFunction(req, ValidationRule){
+        validator(req.body, ValidationRule, {}, (err, status) => {
+            if (!status) {
+                this.errorMessage = err;
+                return 'failed';
+            }
+            return status;
+        })
     }
 
     async uploadIdCard(req, res){
         try{
+
+            //validation
+            let validationRule = {
+                document_number: "required|string"
+            };
+            let validateUser = this.valdateFunction(req, validationRule);
+            if(validateUser === 'failed'){
+                this.responseObject.setStatus(false);
+                this.responseObject.setMessage(this.errorMessage.errors);
+                return res.json(this.responseObject.sendToView());
+            }
+
+            //get the document number
+            let documentNumber = req.body.document_number;
 
             let userObject = await authData(req);
             userObject = await this.User.selectOneUser([["unique_id", "=", userObject.user.unique_id]]);
@@ -59,6 +85,7 @@ class IdentityUploadController {
                 unique_id: userObject.unique_id,
                 id_upload_status: this.AccountVerificationLevels.id_upload_pending,
                 id_name: req.file.filename,
+                document_number:documentNumber,
                 updated_at: currenctDate,
             });
 

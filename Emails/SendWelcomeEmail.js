@@ -4,11 +4,12 @@ var welcomeEmailTemplate = require("../Emails/EmailTemplates/WelcomeEmailTemplat
 var mailler = require("../Emails/MailAccount");
 const MailSetups = require("../Emails/MailSetups");
 
-AuthenticationCode = new AuthenticationCode();
+
 
 class SendWelcomeEmail {
   constructor() {
     this.DbActions = new DbActions();
+    this.AuthenticationCode = new AuthenticationCode();
   }
   async sendMail(userObject) {
     let settingsDetails = await this.DbActions.selectSingleRow("settings", {
@@ -16,9 +17,9 @@ class SendWelcomeEmail {
     });
 
     //create the activation code
-    let activationCode = await AuthenticationCode.createActivationCode(
+    let activationCode = await this.AuthenticationCode.createActivationCode(
       userObject,
-      AuthenticationCode.account_activation_type
+        this.AuthenticationCode.account_activation_type
     );
     if (activationCode.status === false) {
       return {

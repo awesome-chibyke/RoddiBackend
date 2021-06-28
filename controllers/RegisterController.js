@@ -61,8 +61,7 @@ class RegisterController {
       let MessageType = this.MessageType.returnMessageType('account_activation')
       this.responseObject.setMesageType(MessageType)
       this.responseObject.setData({
-        email: userObject.email,
-        toke_type: "account-activation",
+        email: userObject.email
       });
       res.json(this.responseObject.sendToView());
     } catch (e) {
@@ -73,6 +72,12 @@ class RegisterController {
       this.responseObject.setData(insertValue);
       res.json(this.responseObject.sendToView());
     }
+  }
+
+  resendActivationEmail(req, res){
+
+    let email = req.body.email;
+
   }
 
 }

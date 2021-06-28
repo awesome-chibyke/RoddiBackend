@@ -23,7 +23,6 @@ class UserController {
       //get values from the body
       const email = req.body.email;
       const token = req.body.token;
-      const token_type = req.body.token_type;
 
       //select the user involved
       let userObject = await this.User.selectOneUser([["email", "=", email]]);
@@ -36,7 +35,7 @@ class UserController {
       let tokenAuthentication =
         await this.AuthenticationCode.verifyTokenValidity(
           token,
-          token_type,
+          this.AuthenticationCode.account_activation_type,
           userObject
         );
       if (tokenAuthentication.status === false) {

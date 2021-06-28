@@ -47,7 +47,7 @@ const validatePhones = (req, res, next) => {
 const AccountActivationValidationRule = {
   email: "required|email",
   token: "required|numeric",
-  token_type: "required|string",
+  //token_type: "required|string",
   //gender: "string",
 };
 
