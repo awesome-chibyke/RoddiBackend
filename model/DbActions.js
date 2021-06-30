@@ -37,6 +37,28 @@ class DbActions {
     return bulkDataSelector;
   }
 
+
+  async selectAllData(
+    tableName,
+    options = { fields: [], filteringConditions: [] },
+    filterDeletedRows = "yes",
+    destroy = "no"
+  ) {
+    const { fields, filteringConditions } = options;
+
+    let bulkDataSelector = dataBaseConnection(tableName)
+      .select(fields);
+    if (filterDeletedRows === "yes") {
+      bulkDataSelector.havingNull("deleted_at");
+    }
+    bulkDataSelector.then((data) => data);
+
+    if (destroy === "yes") {
+      bulkDataSelector.finally(() => dataBaseConnection.destroy());
+    }
+    return bulkDataSelector;
+  }
+
   //select a single row
   async selectSingleRow(
     tableName,
