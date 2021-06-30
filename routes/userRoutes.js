@@ -6,7 +6,7 @@ let UserController = require("../controllers/UserController");
 const verifyToken = require("../helpers/CheckTokenExistense");
 let PhoneVerifyController = require("../controllers/PhoneVerifyController");
 const validator = require("../helpers/validator");
-let CurrencyController = require("../controllers/ChoseCurrencyController")
+let CurrencyController = require("../controllers/ChoseCurrencyController");
 
 // Instantiate Functions
 EditProfileController = new EditProfileController();
@@ -116,7 +116,9 @@ router.get("/generate_token", verifyToken, async (req, res) => {
 });
 
 //finalise two factor activation
-router.post("/finalise_two_factor_activation",verifyToken,
+router.post(
+  "/finalise_two_factor_activation",
+  verifyToken,
   async (req, res) => {
     TwoFactorController.finalActivationForTwoFactor(req, res);
   }
@@ -130,8 +132,12 @@ router.use(function (err, req, res, next) {
   });
 });
 
-router.get("/get_all_currency", verifyToken, async(req, res) =>{
-  CurrencyController.getCurrency(req, res)
-})
+router.get("/get_all_currency", verifyToken, async (req, res) => {
+  CurrencyController.getCurrency(req, res);
+});
+
+router.put("/update_currency", verifyToken, async (req, res) => {
+  CurrencyController.chosePreferedCurrency(req, res);
+});
 
 module.exports = router;
