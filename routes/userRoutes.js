@@ -48,7 +48,7 @@ const validatePhones = (req, res, next) => {
 const AccountActivationValidationRule = {
   email: "required|email",
   token: "required|numeric",
-  token_type: "required|string",
+  //token_type: "required|string",
   //gender: "string",
 };
 
@@ -105,24 +105,10 @@ router.post("/validate_phone", async (req, res) => {
   PhoneVerifyController.verify(req, res);
 });
 
-//activate the use of o auth application
-router.get("/activate_two_factor_auth", verifyToken, async (req, res) => {
-  TwoFactorController.createSecret(req, res);
-});
-
 //generate a new token
 router.get("/generate_token", verifyToken, async (req, res) => {
   TwoFactorController.generateToken(req, res);
 });
-
-//finalise two factor activation
-router.post(
-  "/finalise_two_factor_activation",
-  verifyToken,
-  async (req, res) => {
-    TwoFactorController.finalActivationForTwoFactor(req, res);
-  }
-);
 
 router.use(function (err, req, res, next) {
   //console.error(err.stack);

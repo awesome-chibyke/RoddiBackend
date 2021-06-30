@@ -2,9 +2,10 @@ var express = require("express");
 let responseObject = require("../controllers/ViewController");
 let IdentityUploadController = require("../controllers/IdentityUploadController");
 const verifyToken = require("../helpers/CheckTokenExistense");
-const validator = require("../helpers/validator");
-const {storage, fileFilter, limits} = require('../helpers/FileUploadHelpers')
+const {storage, fileFilter, limits} = require('../helpers/FileUploadHelpers');
 let multer = require("multer");
+
+responseObject = new responseObject();
 
 // Instantiate Functions
 IdentityUploadController = new IdentityUploadController();
@@ -35,7 +36,7 @@ router.route("/upload_id_card")
         });
         res.json(responseObject.sendToView());
 
-    })
+    });
 
 router.use(function (err, req, res, next) {
     //console.error(err.stack);

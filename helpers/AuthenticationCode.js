@@ -21,6 +21,8 @@ class AuthenticationCode {
 
     this.account_activation_type = "account_activation";
     this.phone_verification_type = 'phone_verification';
+    this.forgot_password_type = 'forgot_password';
+    this.disable_two_factor_type = 'disable_two_factor';
     this.code_expiration_time = 5;
     this.now = new Date();
   }
@@ -88,7 +90,7 @@ class AuthenticationCode {
   }
 
   //check if the token is valid
-  async verifyTokenValidity(token, token_type, userObject) {
+  async verifyTokenValidity(token, token_type, userObject, tokenStatus = "used") {
     try {
       let email = userObject.email;
 
@@ -98,7 +100,7 @@ class AuthenticationCode {
           ["user_unique_id", "=", userObject.unique_id],
           ["token", "=", token],
           ["type", "=", token_type],
-          //["status", "=", "un-used"],
+          ["status", "=", "un-used"],
         ],
       });
 
@@ -135,7 +137,7 @@ class AuthenticationCode {
 
       //mark token as used
       let tokenUpdate = await this.TokenManager.updateToken({
-        status: "used",
+        status: tokenStatus,
         unique_id: tokenDetails.unique_id,
       });
 

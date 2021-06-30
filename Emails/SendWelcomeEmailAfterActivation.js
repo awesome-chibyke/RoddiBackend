@@ -15,7 +15,7 @@ class SendWelcomeEmailAfterActivation {
     this.Settings = new Settings();
   }
 
-  async sendMail(userObject) {
+  async sendMail(userObject, count = 0) {
     //create the activation code
     let activationCode = await AuthenticationCode.createActivationCode(
       userObject,
@@ -56,6 +56,12 @@ class SendWelcomeEmailAfterActivation {
       systemSettings,
     );
     let mailSender = await mailler(mailSetup);
+
+    count++;
+    if(mailSender.status === false && count < 3){
+      return await this.sendMail(userObject, count);
+    }
+
     return mailSender;
   }
 }

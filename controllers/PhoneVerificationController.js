@@ -21,7 +21,6 @@ class PhoneVerifyController {
   async VerifyPhone(req, res) {
     try {
       //authenticate user
-      console;
       let userObject = await authData(req);
       userObject = userObject.user;
 
