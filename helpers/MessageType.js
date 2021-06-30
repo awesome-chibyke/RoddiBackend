@@ -5,8 +5,12 @@ class MessageType{
             normal:'normal',
             blocked_account:'blocked_account',//for blocked account
             update_profile:'update_profile',//for blocked account
-            login_auth_email_phone:'login_auth_email_phone',//for blocked account
-            login_auth_app:'login_auth_app',//for blocked account
+            login_auth_email_phone:'login_auth_email_phone',//for login verification with emial
+            login_auth_app:'login_auth_app',//for login with auth app
+            forgot_password_auth_app:'forgot_password_auth_app',//trigger forgot password with auth app
+            forgot_password_email_auth:'forgot_password_email_auth',//trigger forgot password with email app
+            password_change_email_option:'password_change_email_option',//email option for password change
+            password_change_auth_option:'password_change_auth_option',//auth option for password change
         };
         return messageArray[key];
     }
