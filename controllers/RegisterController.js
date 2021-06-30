@@ -60,7 +60,7 @@ class RegisterController {
       this.responseObject.setMessage("Registration was successful. An account activation code has been sent to your email. please supply code to activate account.");
       delete userObject.password;
       //get the message type for view activate-account')
-      let MessageType = this.MessageType.returnMessageType('account_activation')
+      let MessageType = this.MessageType.returnMessageType('account_activation');
       this.responseObject.setMesageType(MessageType)
       this.responseObject.setData({
         email: userObject.email
@@ -76,9 +76,23 @@ class RegisterController {
     }
   }
 
-  resendActivationEmail(req, res){
+  async resendActivationEmail(req, res){
 
     let email = req.body.email;
+
+    let userObject = await this.User.selectOneUser([['email', '=', email]]);
+    let sendMail = await this.SendWelcomeEmail.sendMail(userObject);
+
+    this.responseObject.setStatus(true);
+    this.responseObject.setMessage("An account activation code has been sent to your email. please supply code to activate account.");
+    delete userObject.password;
+    //get the message type for view activate-account')
+    let MessageType = this.MessageType.returnMessageType('account_activation');
+    this.responseObject.setMesageType(MessageType)
+    this.responseObject.setData({
+      email: userObject.email
+    });
+    res.json(this.responseObject.sendToView());
 
   }
 

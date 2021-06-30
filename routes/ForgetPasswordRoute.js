@@ -22,9 +22,14 @@ router.post("/", async (req, res) => {
     await ForgotPasswordController.sendForgotPasswordMessage(req, res);
 });
 
-//resend the login auth code using email
+//confirm the password token
 router.post("/confirm-forgot-password-token", async (req, res) => {
     await ForgotPasswordController.confirmForgotPasswordToken(req, res);
+});
+
+
+router.post("/change-password", async (req, res) => {
+    await ForgotPasswordController.changeUserPassword(req, res);
 });
 
 module.exports = router;

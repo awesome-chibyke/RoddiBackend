@@ -29,7 +29,6 @@ class SendVerificationCode {
     var authToken = process.env.TWILIO_AUTH_TOKEN;
 
     var client = new twilio(accountSid, authToken);
-
     client.messages
       .create({
         body:

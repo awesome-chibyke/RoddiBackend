@@ -76,7 +76,6 @@ class User {
     let middleName = userObject.middle_name === null || userObject.middle_name === '' ? '' : userObject.middle_name;
     let lastName = userObject.last_name === null || userObject.last_name === '' ? '' : userObject.last_name;
     let fullName = firstName+' '+middleName+' '+lastName;
-    console.log(fullName);
     return fullName;
   }
 

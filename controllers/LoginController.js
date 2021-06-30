@@ -57,8 +57,7 @@ class LoginController {
           this.MessageType.returnMessageType("account_activation");
         this.responseObject.setMesageType(messageType);
         this.responseObject.setData({
-          email: user.email,
-          toke_type: "account-activation",
+          email: user.email
         });
         throw new Error(
           "An activation email was successfully sent to your email, please activate your account by providing the code in the mail"
@@ -140,7 +139,6 @@ class LoginController {
     try {
       //authenticate if the user is logged in
       const email = req.body.email;
-      const token_type = req.body.token_type;
 
       //select the user involved
       let userObject = await this.User.selectOneUser([["email", "=", email]]);
@@ -152,7 +150,7 @@ class LoginController {
       let tokenAuthentication =
       await this.AuthenticationCode.verifyTokenValidity(
         req.body.token,
-        req.body.token_type,
+        this.AuthenticationCode.login_auth_type,
         userObject
       );
 

@@ -22,6 +22,7 @@ class AuthenticationCode {
     this.account_activation_type = "account_activation";
     this.phone_verification_type = 'phone_verification';
     this.forgot_password_type = 'forgot_password';
+    this.disable_two_factor_type = 'disable_two_factor';
     this.code_expiration_time = 5;
     this.now = new Date();
   }

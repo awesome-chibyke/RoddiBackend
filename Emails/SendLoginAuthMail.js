@@ -14,7 +14,7 @@ class SendLoginAuthEmail {
     this.Settings = new Settings();
   }
 
-  async sendMail(userObject, token) {
+  async sendMail(userObject, token, count = 0) {
     try {
       let fullName = this.User.returnFullName(userObject);
       //select the system settings
@@ -44,12 +44,20 @@ class SendLoginAuthEmail {
 
       let mailSender = await mailler(mailSetup);
 
+      count++
+      if(mailSender.status === false && count < 3){
+        return await this.sendMail(userObject, token, count);
+      }
+
       return {
         status: true,
         message:
           "Authentication Code was successfully sent to your email address",
         data: mailSender,
       };
+
+
+
     } catch (err) {
       return {
         status: false,

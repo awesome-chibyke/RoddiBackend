@@ -99,7 +99,7 @@ class ForgotPasswordController {
 
             //send the response to the view
             this.responseObject.setMesageType(messageType);
-            this.responseObject.setData({email: selectedUserObject.email, token_type:this.AuthenticationCode.forgot_password_type });//set the datas to be sent to view
+            this.responseObject.setData({email: selectedUserObject.email });//set the datas to be sent to view
             this.responseObject.setStatus(true);
             this.responseObject.setMessage(responseMessage);
             res.status(200).json(this.responseObject.sendToView());
@@ -114,7 +114,7 @@ class ForgotPasswordController {
     }
 
     //do the actual mail sending to the users account
-    async prepareForgotPasswordMailMessage(userObject, token, expirationTime){
+    async prepareForgotPasswordMailMessage(userObject, token, expirationTime, count = 0){
 
         let settingsDetails = await this.DbActions.selectSingleRow("settings", {
             filteringConditions: [["id", "=", 1]],
@@ -140,8 +140,8 @@ class ForgotPasswordController {
         );
 
         let mailSender = await mailler(mailSetup);
-
-        if(mailSender.status === false){
+        count++//increment the count
+        if(mailSender.status === false && count < 3){
             this.prepareForgotPasswordMailMessage(userObject, token, expirationTime);
         }
         return mailSender
@@ -159,7 +159,7 @@ class ForgotPasswordController {
 
             //validation
             let validationRule = {
-                email: "required|string",
+                email: "required|email",
                 token:"required|numeric",
             };
 
@@ -174,7 +174,6 @@ class ForgotPasswordController {
 
             //authenticate if the user is logged in
             const email = req.body.email;
-            const token_type = req.body.token_type;
             const token = req.body.token;
 
             //select the user involved
@@ -189,7 +188,7 @@ class ForgotPasswordController {
                 let tokenAuthentication =
                     await this.AuthenticationCode.verifyTokenValidity(
                         token,
-                        token_type,
+                        this.AuthenticationCode.forgot_password_type,
                         userObject,
                         'confirmed'
                     );
@@ -223,7 +222,7 @@ class ForgotPasswordController {
             //send response to the view that password is eligible to be changed
 
             this.responseObject.setMesageType(messageType);
-            this.responseObject.setData({ token: token, email: userObject.email, token_type:this.AuthenticationCode.forgot_password_type });//set the datas to be sent to view
+            this.responseObject.setData({ token: token, email: userObject.email });//set the datas to be sent to view
             this.responseObject.setStatus(true);
             this.responseObject.setMessage(displayMessage);
             res.status(200).json(this.responseObject.sendToView());
@@ -237,24 +236,28 @@ class ForgotPasswordController {
         }
     }
 
+
+
     //change user password
     async changeUserPassword(req, res){
 
         try{
+
             let message_type = req.body.message_type;
             let password_change_email_option = this.MessageType.returnMessageType('password_change_email_option');
             let password_change_auth_option = this.MessageType.returnMessageType('password_change_auth_option');
+
             //validation
             let validationRule = {
-                email: "required|string",
+                email: "required|email",
                 token:"required|numeric",
-                password:"required|string",
+                password:"required|string|confirmed",
             };
 
             if(message_type === password_change_email_option){ validationRule.token_type = "required|string"; }//assign the token_type when its an email auth
 
-            let validateEmail = this.valdateFunction(req, validationRule);
-            if(validateEmail === 'failed'){
+            this.valdateFunction(req, validationRule);
+            if(this.errorStatus === false){
                 this.responseObject.setStatus(false);
                 this.responseObject.setMessage(this.errorMessage.errors);
                 return res.json(this.responseObject.sendToView());
@@ -262,7 +265,7 @@ class ForgotPasswordController {
 
             //authenticate if the user is logged in
             const email = req.body.email;
-            const token_type = req.body.token_type;
+            const token_type = this.AuthenticationCode.forgot_password_type;
             const token = req.body.token;
             const password = req.body.password;
 

@@ -1,9 +1,12 @@
 class AccountVerificationLevels {
     constructor (){
         //verification levels
-        this.id_verification_level = 50;
-        this.phone_verification_level = 10;
-        this.face_verification_level = 40;
+        this.account_activation_verification_level = 10;
+        this.profile_update_verification_level = 20;
+        this.phone_verification_level = 20;
+        this.face_verification_level = 20;
+        this.id_verification_level = 30;
+
 
         //upload status for id
         this.id_upload_pending = 'under_review';
