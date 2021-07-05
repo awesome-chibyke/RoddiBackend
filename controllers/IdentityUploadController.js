@@ -81,7 +81,7 @@ class IdentityUploadController {
 
             //add the file to the db
             let currenctDate = date.format(this.now, "YYYY-MM-DD HH:mm:ss");
-            await this.User.updateUser({
+            let updatedUserData = await this.User.updateUser({
                 unique_id: userObject.unique_id,
                 id_upload_status: this.AccountVerificationLevels.id_upload_pending,
                 id_name: req.file.filename,
@@ -94,6 +94,8 @@ class IdentityUploadController {
 
             //send response to the view
             this.responseObject.setStatus(true);
+            let userDataForView = await this.User.returnUserForView(updatedUserData);
+            this.responseObject.setData({user:userDataForView});
             this.responseObject.setMessage("You have successfully uploaded your ID, please wait while we review the document");
             res.json(this.responseObject.sendToView());
 
@@ -151,7 +153,7 @@ class IdentityUploadController {
               systemSettings.site_name.toUpperCase() +
               ". Please wait while we review your document. Thanks",
             to: userObject.phone,
-            from: "+12242035261",
+            from:process.env.TWILIO_PHONE_NUMBER,
           })
           .then((message) => {
             return message;
