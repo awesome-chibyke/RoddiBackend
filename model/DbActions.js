@@ -11,7 +11,7 @@ class DbActions {
     return dataInserter;
   }
 
-  async selectBulkData(
+  async selectBulkData(//where
     tableName,
     options = { fields: [], filteringConditions: [] },
     filterDeletedRows = "yes",

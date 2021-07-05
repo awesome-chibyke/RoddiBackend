@@ -4,7 +4,6 @@ let EditProfileController = require("../controllers/EditProfileController");
 let TwoFactorController = require("../controllers/TwoFactorController");
 let UserController = require("../controllers/UserController");
 const verifyToken = require("../helpers/CheckTokenExistense");
-let PhoneVerifyController = require("../controllers/PhoneVerifyController");
 const validator = require("../helpers/validator");
 let CurrencyController = require("../controllers/ChoseCurrencyController");
 
@@ -13,7 +12,6 @@ EditProfileController = new EditProfileController();
 UserController = new UserController();
 responseObject = new responseObject();
 TwoFactorController = new TwoFactorController();
-PhoneVerifyController = new PhoneVerifyController();
 CurrencyController = new CurrencyController();
 // Call Express
 var router = express.Router();
@@ -101,10 +99,6 @@ router.post("/activate_account", async (req, res) => {
   UserController.ActivateAccount(req, res);
 });
 
-router.post("/validate_phone", async (req, res) => {
-  PhoneVerifyController.verify(req, res);
-});
-
 //generate a new token
 router.get("/generate_token", verifyToken, async (req, res) => {
   TwoFactorController.generateToken(req, res);
@@ -124,6 +118,11 @@ router.get("/get_all_currency", verifyToken, async (req, res) => {
 
 router.put("/update_currency", verifyToken, async (req, res) => {
   CurrencyController.chosePreferedCurrency(req, res);
+});
+
+//return the user object
+router.get("/user_profile", verifyToken, async (req, res) => {
+  UserController.returnUserProfile(req, res);
 });
 
 module.exports = router;

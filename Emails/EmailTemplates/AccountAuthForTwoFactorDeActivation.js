@@ -239,7 +239,7 @@ const AccountAuthForTwoFactorDeactivation = (
                                                 <span style="color:rgb(10, 4, 60);">${$settingsObj.site_name}</span>
                                             </h2>
                                             <h2 style="text-align: left; text-transform: uppercase; padding-left: 10px; font-family: ${$cursive}; margin-top: 5px;">
-                                                <!--<span style="color:rgb(10, 4, 60);">SURE HOME</span>--> ${$settingsObj.slogan.toUpperCase()}</h2>
+                                                <!--<span style="color:rgb(10, 4, 60);">SURE HOME</span>--> ${$settingsObj.slogan === null ? '' : $settingsObj.slogan}</h2>
 
                                             <h3 align="center">${subject}</h3>
                                             <div align="center">
@@ -344,6 +344,7 @@ const AccountAuthForTwoFactorDeactivation = (
                                             </tr>
                                             </tbody>
                                         </table>
+                                        
                                         <div style="width:100%; margin-bottom: 10px;">
                                             <p>Download our mobile apps, follow the link below</p>
                                             <div style="width: 40%; display: inline-block;">
@@ -445,7 +446,7 @@ const AccountAuthForTwoFactorDeactivation = (
                 font-size: 12px;
                 text-align: center;
                 text-decoration: none;
-                " >${$settingsObj.site_name.toUpperCase()}</a
+                " >${$settingsObj.site_name === null ? '': $settingsObj.site_name}</a
                                 >.
                             </td>
                         </tr>

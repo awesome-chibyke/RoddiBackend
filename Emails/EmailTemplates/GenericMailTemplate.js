@@ -2,8 +2,28 @@ const ForgotPasswordTemplate = (
     fullName,
     subject,
     $settingsObj,
-    message
+    message,
+    token = ''
 ) => {
+    let tokenArea = '';
+    if(token !== ''){
+        tokenArea = `<button type="button" style="
+                        display: inline-block;
+                        color: #ffffff;
+                        background-color: #3498db;
+                        border: solid 1px #3498db;
+                        border-radius: 5px;
+                        box-sizing: border-box;
+                        cursor: pointer;
+                        text-decoration: none;
+                        font-size: 14px;
+                        font-weight: bold;
+                        margin: 0;
+                        padding: 12px 25px;
+                        text-transform: capitalize;
+                        border-color: #3498db;
+                        ">${token}</button>`
+    }
     var $overPass = "'Overpass', sans-serif";
     var $cursive = "'Indie Flower', cursive";
     return `<!DOCTYPE html>
@@ -239,7 +259,7 @@ const ForgotPasswordTemplate = (
                                                 <span style="color:rgb(10, 4, 60);">${$settingsObj.site_name}</span>
                                             </h2>
                                             <h2 style="text-align: left; text-transform: uppercase; padding-left: 10px; font-family: ${$cursive}; margin-top: 5px;">
-                                                <!--<span style="color:rgb(10, 4, 60);">SURE HOME</span>--> ${$settingsObj.slogan.toUpperCase()}</h2>
+                                                <!--<span style="color:rgb(10, 4, 60);">SURE HOME</span>--> ${$settingsObj.slogan === null ? '' : $settingsObj.slogan.toUpperCase()}</h2>
 
                                             <h3 align="center">${subject}</h3>
                                             <div align="center">
@@ -318,24 +338,7 @@ const ForgotPasswordTemplate = (
     text-align: center;
     "
                                                             >
-                                                                <!--<button
-                                                                        href="button"
-                                                                        style="
-    display: inline-block;
-    color: #ffffff;
-    background-color: #3498db;
-    border: solid 1px #3498db;
-    border-radius: 5px;
-    box-sizing: border-box;
-    cursor: pointer;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: bold;
-    margin: 0;
-    padding: 12px 25px;
-    text-transform: capitalize;
-    border-color: #3498db;
-    ">${token}</button>-->
+                                                                ${tokenArea}
                                                             </td>
                                                         </tr>
                                                         </tbody>
@@ -445,7 +448,7 @@ const ForgotPasswordTemplate = (
                 font-size: 12px;
                 text-align: center;
                 text-decoration: none;
-                " >${$settingsObj.site_name.toUpperCase()}</a
+                " >${$settingsObj.site_name === null ? '' : $settingsObj.site_name.toUpperCase()}</a
                                 >.
                             </td>
                         </tr>

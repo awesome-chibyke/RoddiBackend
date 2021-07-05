@@ -2,10 +2,12 @@ const responseObject = require("./ViewController");
 const AuthenticationCode = require("../helpers/AuthenticationCode");
 const ErrorHandler = require("../helpers/ErrorHandler");
 const verifyToken = require("../helpers/AuthenticateLogin");
+const authData = require("../helpers/AuthenticateLogin");
 const User = require("../model/User");
 const date = require("date-and-time");
 const SendWelcomeEmailAfterActivation = require("../Emails/SendWelcomeEmailAfterActivation");
 const jwt = require("jsonwebtoken");
+const AccountVerificationLevels = require("../helpers/AccountVerificationLevels");
 
 class UserController {
   constructor() {
@@ -13,6 +15,7 @@ class UserController {
     this.responseObject = new responseObject();
     this.AuthenticationCode = new AuthenticationCode();
     this.User = new User();
+    this.AccountVerificationLevels = new AccountVerificationLevels();
     this.SendWelcomeEmailAfterActivation =
       new SendWelcomeEmailAfterActivation();
   }
@@ -49,6 +52,8 @@ class UserController {
         unique_id: userObject.unique_id,
         email_verification: currenctDate,
         updated_at: currenctDate,
+        account_verification_level: parseFloat(userObject.account_verification_level) + parseFloat(this.AccountVerificationLevels.account_activation_verification_level),
+        account_verification_step: this.AccountVerificationLevels.account_activation_verification_step
       });
 
       //send a successful account activation mail to the user
@@ -72,6 +77,30 @@ class UserController {
       res.json(this.responseObject.sendToView());
     }
   }
+
+  //pull the user object
+    async returnUserProfile(req, res){
+
+        try {
+            //authenticate user
+            let userObject = await authData(req);
+            userObject = await this.User.selectOneUser([["unique_id", "=", userObject.user.unique_id]]);
+
+            this.responseObject.setMesageType("normal");
+            //return the user object to view
+            let userObjectForView = await this.User.returnUserForView(userObject);
+            this.responseObject.setData({user: userObjectForView});
+            this.responseObject.setStatus(true);
+            this.responseObject.setMessage("User Details has been returned");
+            res.status(200).json(this.responseObject.sendToView());
+
+        } catch (e) {
+            this.responseObject.setStatus(false);
+            this.responseObject.setMessage({ general_error: [ErrorHandler(e)] });
+            res.json(this.responseObject.sendToView());
+        }
+    }
+
 }
 
 module.exports = UserController;

@@ -39,8 +39,8 @@ class SendVerificationCode {
           ". Expires in " +
           AuthenticationCode.code_expiration_time +
           " minutes",
-        to: userObject.phone,
-        from: "+12242035261",
+        to: userObject.country_code+userObject.phone,
+        from: process.env.TWILIO_PHONE_NUMBER,
       })
       .then((message) => console.log(message));
   }
