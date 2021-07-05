@@ -30,7 +30,7 @@ class Settings {
 
     //updatye the user
     await this.DbActions.updateData("settings", {
-      fields: userObject,
+      fields: requestObject,
       filteringConditions: [["unique_id", "=", settings.unique_id]],
     });
     return user;
