@@ -88,7 +88,7 @@ class RegisterController {
     delete userObject.password;
     //get the message type for view activate-account')
     let MessageType = this.MessageType.returnMessageType('account_activation');
-    this.responseObject.setMesageType(MessageType)
+    this.responseObject.setMesageType(MessageType);
     this.responseObject.setData({
       email: userObject.email
     });

@@ -421,7 +421,7 @@ class ForgotPasswordController {
                     settingsDetails.site_name.toUpperCase() +
                     ". Please wait while we review your document. Thanks",
                 to: userObject.phone,
-                from: "+12242035261",
+                from: process.env.TWILIO_PHONE_NUMBER,
             })
             .then((message) => {return message; });
     }

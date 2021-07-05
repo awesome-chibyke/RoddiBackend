@@ -11,6 +11,7 @@ class MessageType{
             forgot_password_email_auth:'forgot_password_email_auth',//trigger forgot password with email app
             password_change_email_option:'password_change_email_option',//email option for password change
             password_change_auth_option:'password_change_auth_option',//auth option for password change
+            cancel_request_to_disble_two_factor:'cancel_request_to_disble_two_factor',//cancel request to disable two factor auth
         };
         return messageArray[key];
     }
