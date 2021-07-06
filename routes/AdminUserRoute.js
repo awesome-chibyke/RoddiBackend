@@ -30,8 +30,8 @@ router.get(
   verifyToken,
   async (req, res) => {
     await AdminUserController.deleteUser(req, res);
-  }
-);
+
+  });
 
 router.put("/update_user_status/:unique_id", verifyToken, async (req, res) => {
   await AdminUserController.editUserStatus(req, res);
@@ -40,5 +40,11 @@ router.put("/update_user_status/:unique_id", verifyToken, async (req, res) => {
 router.put("/update_user_type/:unique_id", verifyToken, async (req, res) => {
     await AdminUserController.editUserType(req, res);
   });
+
+
+//select one user on the db
+router.post("/manage_user_account", verifyToken, async (req, res) => {
+    await AdminUserController.manageUserAccount(req, res);
+});
 
 module.exports = router;
