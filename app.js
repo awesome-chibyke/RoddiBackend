@@ -13,6 +13,7 @@ const resendActivationEmailRoute = require("./routes/resendActivationEmailRoute"
 const IdUploadRoute = require("./routes/IdUploadRoute");
 const ForgetPasswordRoute = require("./routes/ForgetPasswordRoute");
 const TwoFactorSetupRoutes = require("./routes/TwoFactorSetupRoutes");
+const AdminUserRoute = require("./routes/AdminUserRoute");
 var device = require('express-device');
 
 //require cors
@@ -39,6 +40,9 @@ app.use("/activate_account", resendActivationEmailRoute);
 app.use("/identity_management", IdUploadRoute);
 app.use("/forgot-password", ForgetPasswordRoute);//forgot password routes
 app.use("/two_factor", TwoFactorSetupRoutes);//two factor routes
+
+//admin routes
+app.use("/users", AdminUserRoute);//two factor routes
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);

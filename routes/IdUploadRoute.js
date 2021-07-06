@@ -22,13 +22,14 @@ router.use(
 let maxSize = 2000000;
 
 //bring in multer for the upload of the id document
-var upload = multer({ storage: storage('./files/government_id/'), fileFilter:fileFilter(['png', 'jpg', 'jpeg', 'gif']), limits: { fileSize: maxSize } });
+var upload = multer({ storage: storage('./files/uploads/'), fileFilter:fileFilter(['png', 'jpg', 'jpeg', 'gif']), limits: { fileSize: maxSize } });
 
 router.route("/upload_id_card")
-/* replace foo-bar with your form field-name verifyToken */
-    .post(verifyToken, upload.single("upload_id_card"), function(req, res){
+/* replace foo-bar with your form field-name verifyToken *///upload.single("upload_id_card")
+    .post(verifyToken, upload.fields([{ name: 'upload_id_card_back', maxCount: 1 }, { name: 'upload_id_card_front', maxCount: 1 }]), function(req, res){
         IdentityUploadController.uploadIdCard(req, res);
     }, (error, req, res, next) => {
+
 
         res.status(400).send({ error: error.message });
         responseObject.setMessage({

@@ -7,6 +7,9 @@ const IdUploadSuccessTemplate = require("../Emails/EmailTemplates/IdUploadSucces
 const User = require("../model/User");
 const date = require("date-and-time");
 const validator = require("../helpers/validator");
+const {SendGenericSms} = require("../helpers/SendGenericSms");
+const {sendGenericMails} = require("../Emails/GenericMailSender");
+const fileMover = require("../helpers/FileMover");
 
 //import the mail managers
 var mailler = require("../Emails/MailAccount");
@@ -27,27 +30,37 @@ class IdentityUploadController {
         this.AccountVerificationLevels = new AccountVerificationLevels();
         this.Settings = new Settings();
         this.errorMessage = '';
+        this.errorStatus = true;
     }
 
-    valdateFunction(req, ValidationRule){
+    valdateFunction(req, ValidationRule) {
         validator(req.body, ValidationRule, {}, (err, status) => {
-            if (!status) {
+            if (status === false) {
                 this.errorMessage = err;
-                return 'failed';
             }
-            return status;
-        })
+            this.errorStatus = status;
+        });
     }
 
     async uploadIdCard(req, res){
         try{
 
+            let oldPathForBackDisplay = req.files['upload_id_card_back'][0].path;
+            let oldPathForFrontDisplay = req.files['upload_id_card_front'][0].path;
+
+            let filenameForBackDisplay = req.files['upload_id_card_back'][0].filename;
+            let filenameForFrontDisplay = req.files['upload_id_card_front'][0].filename;
+
             //validation
             let validationRule = {
                 document_number: "required|string"
             };
-            let validateUser = this.valdateFunction(req, validationRule);
-            if(validateUser === 'failed'){
+            this.valdateFunction(req, validationRule);
+            if(this.errorStatus === false){
+                //unlink the files
+                await unlinkAsync(oldPathForFrontDisplay);
+                await unlinkAsync(oldPathForBackDisplay);
+
                 this.responseObject.setStatus(false);
                 this.responseObject.setMessage(this.errorMessage.errors);
                 return res.json(this.responseObject.sendToView());
@@ -63,28 +76,37 @@ class IdentityUploadController {
             }
 
             if(userObject.id_upload_status === this.AccountVerificationLevels.id_upload_pending){
-                //unlink the file
-                await unlinkAsync(req.file.path);
+                //unlink the files
+                await unlinkAsync(oldPathForFrontDisplay);
+                await unlinkAsync(oldPathForBackDisplay);
                 throw new Error('your uploaded document is still under review');
             }
 
             if(userObject.id_upload_status === this.AccountVerificationLevels.id_upload_confirmed){
-                //unlink the file
-                await unlinkAsync(req.file.path);
+                //unlink the files
+                await unlinkAsync(oldPathForFrontDisplay);
+                await unlinkAsync(oldPathForBackDisplay);
                 throw new Error('your ID has been confirmed');
             }
 
             //show the user that file upload failed
-            if(typeof req.file === "undefined"){
+            if(typeof req.files === "undefined"){
                 throw new Error('File Upload failed');
             }
+
+            //move the files to the new path
+            fileMover(oldPathForFrontDisplay, './files/government_id_front/'+filenameForFrontDisplay, this.callback);
+            fileMover(oldPathForBackDisplay, './files/government_id_back/'+filenameForBackDisplay, this.callback);
+            /*await unlinkAsync(oldPathForFrontDisplay);
+            await unlinkAsync(oldPathForBackDisplay);*/
 
             //add the file to the db
             let currenctDate = date.format(this.now, "YYYY-MM-DD HH:mm:ss");
             let updatedUserData = await this.User.updateUser({
                 unique_id: userObject.unique_id,
                 id_upload_status: this.AccountVerificationLevels.id_upload_pending,
-                id_name: req.file.filename,
+                id_name:filenameForFrontDisplay,
+                id_back_name: filenameForBackDisplay,
                 document_number:documentNumber,
                 updated_at: currenctDate,
             });
@@ -109,56 +131,30 @@ class IdentityUploadController {
 
     }
 
+    callback(err) {
+        console.log(err)
+    }
+
   //mail sending function
   async sendEmailANDPhoneMessageForSuccessfulIDUpload(userObject) {
+
     try {
+        //select the system settings
+        let systemSettings = await this.Settings.selectSettings([["id", "=", 1]]);
+
       let fullName = this.User.returnFullName(userObject);
 
-      //select the system settings
-      let systemSettings = await this.Settings.selectSettings([["id", "=", 1]]);
-      //title message for the mail
-      const emailTitle = "Successful Upload of Identification Document";
-
-      if (systemSettings === false) {
-        throw new Error("System settings could not be retrieved");
-      } //show errror if the system settings cant be returned
-      let EmailTemplate = IdUploadSuccessTemplate(
-        fullName,
-        emailTitle,
-        systemSettings
-      );
-
-      //send the email to  the user
-      let mailSetup = MailSetups(
-        userObject.email,
-        emailTitle,
-        EmailTemplate,
-        systemSettings
-      );
-
-      let mailSender = await mailler(mailSetup);
-      //console.log(mailSender);
+        let emailSubject = "Successful Upload of Identification Document";
+        let message = `You have successfully uploaded your form of Identification Document to ${systemSettings.site_name.toUpperCase()}. Please wait for a while as this document is under review. We will get back to you once we are done with the review.`;
+        let mailSender = await sendGenericMails(userObject, fullName, systemSettings, emailSubject, message);
 
       //send sms to verified user phone number
-      if (userObject.phone_verification !== null) {
-        var accountSid = process.env.TWILIO_ACCOUNT_SID;
-        var authToken = process.env.TWILIO_AUTH_TOKEN;
-
-        var client = new twilio(accountSid, authToken);
-
-        client.messages
-          .create({
-            body:
-              "You have successfully uploaded your Identification document to " +
-              systemSettings.site_name.toUpperCase() +
-              ". Please wait while we review your document. Thanks",
-            to: userObject.phone,
-            from:process.env.TWILIO_PHONE_NUMBER,
-          })
-          .then((message) => {
-            return message;
-          });
-      }
+    message = "You have successfully uploaded your Identification document to " +
+        systemSettings.site_name.toUpperCase() +
+        ". Please wait while we review your document. Thanks";
+    if(userObject.phone_verification !== null){
+        SendGenericSms(systemSettings, message, userObject);
+    }
 
       return {
         status: true,
