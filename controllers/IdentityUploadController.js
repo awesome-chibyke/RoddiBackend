@@ -7,9 +7,10 @@ const IdUploadSuccessTemplate = require("../Emails/EmailTemplates/IdUploadSucces
 const User = require("../model/User");
 const date = require("date-and-time");
 const validator = require("../helpers/validator");
+const ErrorMessages = require("../helpers/ErrorMessages");
 const {SendGenericSms} = require("../helpers/SendGenericSms");
 const {sendGenericMails} = require("../Emails/GenericMailSender");
-const fileMover = require("../helpers/FileMover");
+const {moveFile} = require("../helpers/FileMover");
 
 //import the mail managers
 var mailler = require("../Emails/MailAccount");
@@ -29,6 +30,7 @@ class IdentityUploadController {
         this.now = new Date();
         this.AccountVerificationLevels = new AccountVerificationLevels();
         this.Settings = new Settings();
+        this.ErrorMessages = new ErrorMessages();
         this.errorMessage = '';
         this.errorStatus = true;
     }
@@ -45,11 +47,14 @@ class IdentityUploadController {
     async uploadIdCard(req, res){
         try{
 
-            let oldPathForBackDisplay = req.files['upload_id_card_back'][0].path;
-            let oldPathForFrontDisplay = req.files['upload_id_card_front'][0].path;
-
             let filenameForBackDisplay = req.files['upload_id_card_back'][0].filename;
             let filenameForFrontDisplay = req.files['upload_id_card_front'][0].filename;
+
+            let oldPathForBackDisplay = req.files['upload_id_card_back'][0].destination+'/'+filenameForBackDisplay;
+            let oldPathForFrontDisplay = req.files['upload_id_card_front'][0].destination+'/'+filenameForFrontDisplay;
+
+            let newPathForBackDisplay = './files/government_id_back/'+filenameForBackDisplay;
+            let newPathForFrontDisplay = './files/government_id_front/'+filenameForFrontDisplay;
 
             //validation
             let validationRule = {
@@ -72,7 +77,8 @@ class IdentityUploadController {
             let userObject = await authData(req);
             userObject = await this.User.selectOneUser([["unique_id", "=", userObject.user.unique_id]]);
             if(userObject === false){
-                throw new Error('User not found');
+                let ErrorMessage = this.ErrorMessages.ErrorMessageObjects.authentication_failed;
+                throw new Error(ErrorMessage);
             }
 
             if(userObject.id_upload_status === this.AccountVerificationLevels.id_upload_pending){
@@ -95,10 +101,8 @@ class IdentityUploadController {
             }
 
             //move the files to the new path
-            fileMover(oldPathForFrontDisplay, './files/government_id_front/'+filenameForFrontDisplay, this.callback);
-            fileMover(oldPathForBackDisplay, './files/government_id_back/'+filenameForBackDisplay, this.callback);
-            /*await unlinkAsync(oldPathForFrontDisplay);
-            await unlinkAsync(oldPathForBackDisplay);*/
+            await moveFile(oldPathForBackDisplay, newPathForBackDisplay);
+            await moveFile(oldPathForFrontDisplay, newPathForFrontDisplay);
 
             //add the file to the db
             let currenctDate = date.format(this.now, "YYYY-MM-DD HH:mm:ss");
