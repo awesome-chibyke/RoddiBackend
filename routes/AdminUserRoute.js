@@ -27,6 +27,11 @@ router.get("/single_user/:unique_id", verifyToken, async (req, res) => {
 //select one user on the db
 router.get("/delete_user/:unique_id/:type_of_user", verifyToken, async (req, res) => {
     await AdminUserController.deleteUser(req, res);
+})
+
+;//select one user on the db
+router.post("/manage_user_account", verifyToken, async (req, res) => {
+    await AdminUserController.manageUserAccount(req, res);
 });
 
 module.exports = router;

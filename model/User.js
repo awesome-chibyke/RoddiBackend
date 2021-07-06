@@ -69,15 +69,17 @@ class User {
     return userObject;
   }
 
-  async returnUserForView(userObj) {
-    delete userObj.password;
-    delete userObj.password;
+  async returnUserForView(userObj, userType = 'user') {
+    if(userType === 'user'){
+      delete userObj.document_number;
+    }
     delete userObj.two_factor_temp_secret;
     delete userObj.two_factor_secret;
-    delete userObj.document_number;
+    delete userObj.password;
     userObj.currency_details = await this.fetchUserCurrency(userObj.preferred_currency);
     userObj.verifiation_details_object = this.AccountVerificationLevels.verifiation_details;
     userObj.current_verification_step = this.AccountVerificationLevels.checkUserVerificationStep(userObj);
+
     return userObj;
   }
 

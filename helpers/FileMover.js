@@ -1,31 +1,12 @@
-var fs = require('fs');
+const {promisify} = require('util');
+const fs = require('fs');
+const {join} = require('path');
+const mv = promisify(fs.rename);
 
-module.exports = function move(oldPath, newPath, callback) {
-
-    fs.rename(oldPath, newPath, function (err) {
-        if (err) {
-            if (err.code === 'EXDEV') {
-                copy();
-            } else {
-                callback(err);
-            }
-            return;
-        }
-        callback();
-    });
-
-    function copy() {
-        var readStream = fs.createReadStream(oldPath);
-        var writeStream = fs.createWriteStream(newPath);
-
-        readStream.on('error', callback);
-        writeStream.on('error', callback);
-
-        readStream.on('close', function () {
-            fs.unlink(oldPath, callback);
-        });
-
-        readStream.pipe(writeStream);
-    }
-};
+exports.moveFile = async (oldPath, newPath) => {
+    // Move file ./bar/foo.js to ./baz/qux.js
+    const original = oldPath;
+    const target = newPath;
+    await mv(original, target);
+}
 

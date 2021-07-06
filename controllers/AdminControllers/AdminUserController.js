@@ -250,6 +250,57 @@ class EditController {
             .then((message) => {return message; });
     }
 
+    async manageUserAccount(req, res){
+
+        try{
+
+            let actionKeyword = req.body.action;//the action from the user side, it can be any of the values in the actionArray
+            let unique_id = req.body.unique_id;//the unique_id of the user that the action is being performed on his/her account
+
+            let loggedUser = await authData(req);//authenticate the logged in admin
+            loggedUser = await this.User.selectOneUser([["unique_id", "=", loggedUser.user.unique_id]]);
+            if(loggedUser === false){
+                let ErrorMessage = this.ErrorMessages.ErrorMessageObjects.authentication_failed;
+                throw new Error(ErrorMessage);
+            }
+
+            let actionArray = ['make_admin', 'make_super_admin', 'make_user', 'make_publisher', 'make_accountant'];//action array
+            let columnName = ['user_type','user_type','user_type','user_type', 'user_type'];//column name where the action will be perform
+            let valueArray = ['admin', 'super_admin', 'user', 'publisher', 'accountant'];//value that will inserted into the column
+
+            if(actionArray.includes(actionKeyword)){//check if the action exists in the action array
+                let key = actionArray.indexOf(actionKeyword);//get the action index from the array
+                let column = columnName[key];//get the column name
+                let $value = valueArray[key];//get the value to be inserted
+
+                let objectsForUpdate = {unique_id:unique_id};
+                objectsForUpdate[column] = $value;//created the update object
+
+                let updatedUserObject = await this.User.updateUser(objectsForUpdate);//update the user
+
+                //u can extend the funtion from this point
+
+                //send response to the view
+                this.responseObject.setStatus(true);
+                let userDataForView = await this.User.returnUserForView(updatedUserObject, loggedUser.type_of_user);
+                this.responseObject.setData({user:userDataForView});
+                this.responseObject.setMessage("You have successfully uploaded your ID, please wait while we review the document");
+                res.json(this.responseObject.sendToView());
+
+            }else{
+                let ErrorMessage = this.ErrorMessages.ErrorMessageObjects.invalid_action;
+                throw new Error(ErrorMessage);
+            }
+        }catch (err) {
+            this.responseObject.setStatus(false);
+            this.responseObject.setMessage({
+                general_error: [ErrorHandler(err)],
+            });
+            res.json(this.responseObject.sendToView());
+        }
+
+    }
+
 }
 
 module.exports = EditController;
