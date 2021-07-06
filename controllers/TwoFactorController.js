@@ -585,7 +585,7 @@ class TwoFactorController {
         ['oauth_disable_steps', '=', 'phone_auth'],
         ['oauth_disable_request', '=', 'yes']
       ]);
-      if (allUsers === false) {
+      if (allUsers.length == 0) {
         let ErrorMessage = this.ErrorMessages.ErrorMessageObjects.no_data
         return {
             status:false,

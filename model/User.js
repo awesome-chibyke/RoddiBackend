@@ -13,25 +13,25 @@ class User {
   }
 
 
-  async selectAllUsersWhere(conditions){
+  async selectAllUsersWhere(conditions, filterDeletedRow = 'yes'){
     ////[["unique_id", "=", Currency]]
     let allUsers = await this.DbActions.selectBulkData("users", {
       filteringConditions: conditions,
-    });
-    if (allUsers.length == 0) {
+    }, filterDeletedRow);
+    /*if (allUsers.length == 0) {
       return false;
-    }
+    }*/
     return allUsers;
   }
 
-  async selectAllUsers(conditions = []){
+  async selectAllUsers(conditions = [], filterDeletedRows = 'yes'){
     ////[["unique_id", "=", Currency]]
     let allUsers = await this.DbActions.selectAllData("users", {
       filteringConditions: conditions,
-    });
-    if (allUsers.length == 0) {
+    }, filterDeletedRows);
+    /*if (allUsers.length == 0) {
       return false;
-    }
+    }*/
     return allUsers;
   }
 
@@ -58,11 +58,11 @@ class User {
     return fullName;
   }
 
-  async selectOneUser(conditions) {
+  async selectOneUser(conditions, filterDeletedRows = 'yes') {
     //conditions = [["email", "=", email]];
     let userObject = await this.DbActions.selectSingleRow("users", {
       filteringConditions: conditions,
-    });
+    },filterDeletedRows);
     if (typeof userObject === "undefined") {
       return false;
     }
