@@ -9,6 +9,8 @@ const validator = require("../../helpers/validator");
 const Settings = require("../../model/Settings");
 const twilio = require("twilio");
 const {sendGenericMails} = require("../../Emails/GenericMailSender");
+const ErrorMessages = require("../../helpers/ErrorMessages");
+const DbActions = require("../../model/DbActions");
 
 class EditController {
     constructor() {
@@ -20,6 +22,8 @@ class EditController {
         this.AccountVerificationLevels = new AccountVerificationLevels();
         this.errorMessage = "";
         this.errorStatus = true;
+        this.ErrorMessages = new ErrorMessages();
+        this.DbActions = new DbActions();
     }
 
     valdateFunction(req, ValidationRule) {
@@ -31,13 +35,121 @@ class EditController {
         });
     }
 
+    //select all user for admin view
+    async SelectAllUserForAdminView(req, res){
+        try{
+            //authenticate user
+            let userObject = await authData(req);
+            userObject = await this.User.selectOneUser([['unique_id', '=', userObject.user.unique_id]]);
+            if(userObject === false){
+                let ErrorMessage = this.ErrorMessages.ErrorMessageObjects.invalid_user;
+                throw new Error(ErrorMessage);
+            }
+
+            let type_of_user = req.params.type_of_user;
+
+            let allUsers = await this.User.selectAllUsersWhere([
+                ['type_of_user', '=', type_of_user]
+            ],'no');
+
+            //return value to view
+            this.responseObject.setStatus(true);
+            this.responseObject.setData({all_users:allUsers});
+            this.responseObject.setMessage("User have been successfully returned");
+            res.json(this.responseObject.sendToView());
+        }catch(err){
+            this.responseObject.setStatus(false);
+            this.responseObject.setMessage({
+                general_error: [ErrorHandler(err)],
+            });
+            res.json(this.responseObject.sendToView());
+        }
+    }
+
+    //select all user for admin view
+    async SelectOneUserForAdminView(req, res){
+        try{
+            //authenticate user
+            let userObject = await authData(req);
+            userObject = await this.User.selectOneUser([['unique_id', '=', userObject.user.unique_id]]);
+            if(userObject === false){
+                let ErrorMessage = this.ErrorMessages.ErrorMessageObjects.invalid_user;
+                throw new Error(ErrorMessage);
+            }
+
+            let unique_id = req.params.unique_id;
+            let UserObject = await this.User.selectOneUser([
+                ['unique_id', '=', unique_id]
+            ],'no');
+            if(UserObject === false){
+                UserObject = null;
+            }
+
+            //return value to view
+            this.responseObject.setStatus(true);
+            this.responseObject.setData({single_user:UserObject});
+            this.responseObject.setMessage("User have been successfully returned");
+            res.json(this.responseObject.sendToView());
+        }catch(err){
+            this.responseObject.setStatus(false);
+            this.responseObject.setMessage({
+                general_error: [ErrorHandler(err)],
+            });
+            res.json(this.responseObject.sendToView());
+        }
+    }
+
+    //select all user for admin view
+    async deleteUser(req, res){
+        try{
+            //the details fromm param
+            let type_of_user = req.params.type_of_user;
+            let unique_id = req.params.unique_id;
+
+            //authenticate user
+            let userObject = await authData(req);
+            userObject = await this.User.selectOneUser([['unique_id', '=', userObject.user.unique_id]]);
+            if(userObject === false){
+                let ErrorMessage = this.ErrorMessages.ErrorMessageObjects.invalid_user;
+                throw new Error(ErrorMessage);
+            }
+
+            let UserToDelete = await this.User.selectOneUser([
+                ['unique_id', '=', unique_id],['type_of_user', '=', type_of_user]
+            ],'no');
+            if(UserToDelete === false){
+                throw new Error('Id supplied does not match that of any user');
+            }
+
+            //delete the user
+            await this.DbActions.deleteDataFromTable('users', 'unique_id', unique_id, ['code_table'], 'user_unique_id');
+
+            let allUsers = await this.User.selectAllUsersWhere([
+                ['type_of_user', '=', type_of_user]
+            ],'no');
+
+            //return value to view
+            this.responseObject.setStatus(true);
+            this.responseObject.setData({all_users:allUsers});
+            this.responseObject.setMessage("User have been successfully deleted");
+            res.json(this.responseObject.sendToView());
+
+        }catch(err){
+            this.responseObject.setStatus(false);
+            this.responseObject.setMessage({
+                general_error: [ErrorHandler(err)],
+            });
+            res.json(this.responseObject.sendToView());
+        }
+    }
+
     async edit(req, res) {
         try {
             //validation
             let validationRule = {
                 first_name: "required|string",
                 last_name: "required|string",
-                //middle_name: "required|string",
+                middle_name: "required|string",
                 address: "required|string",
                 state: "required|string",
                 country: "required|string",
