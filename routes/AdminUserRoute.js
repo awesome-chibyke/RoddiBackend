@@ -9,24 +9,36 @@ AdminUserController = new AdminUserController();
 var router = express.Router();
 
 router.use(
-    express.urlencoded({
-        extended: true,
-    })
+  express.urlencoded({
+    extended: true,
+  })
 );
 
 //select all the user on the db
 router.get("/all_users/:type_of_user", verifyToken, async (req, res) => {
-    await AdminUserController.SelectAllUserForAdminView(req, res);
+  await AdminUserController.SelectAllUserForAdminView(req, res);
 });
 
 //select one user on the db
 router.get("/single_user/:unique_id", verifyToken, async (req, res) => {
-    await AdminUserController.SelectOneUserForAdminView(req, res);
+  await AdminUserController.SelectOneUserForAdminView(req, res);
 });
 
 //select one user on the db
-router.get("/delete_user/:unique_id/:type_of_user", verifyToken, async (req, res) => {
+router.get(
+  "/delete_user/:unique_id/:type_of_user",
+  verifyToken,
+  async (req, res) => {
     await AdminUserController.deleteUser(req, res);
+  }
+);
+
+router.put("/update_user_status/:unique_id", verifyToken, async (req, res) => {
+  await AdminUserController.editUserStatus(req, res);
 });
+
+router.put("/update_user_type/:unique_id", verifyToken, async (req, res) => {
+    await AdminUserController.editUserType(req, res);
+  });
 
 module.exports = router;
