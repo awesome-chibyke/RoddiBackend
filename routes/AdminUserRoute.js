@@ -33,18 +33,17 @@ router.get(
 
   });
 
-router.put("/update_user_status/:unique_id", verifyToken, async (req, res) => {
-  await AdminUserController.editUserStatus(req, res);
-});
-
-router.put("/update_user_type/:unique_id", verifyToken, async (req, res) => {
-    await AdminUserController.editUserType(req, res);
-  });
-
-
 //select one user on the db
-router.post("/manage_user_account", verifyToken, async (req, res) => {
+router.put("/manage_user_account", verifyToken, async (req, res) => {
     await AdminUserController.manageUserAccount(req, res);
 });
+
+router.post("/edit_user", verifyToken, async (req, res) => {
+  await AdminUserController.edit(req, res);
+});
+
+// router.post("/id_upload", verifyToken, async (req, res) => {
+//   await AdminUserController.updateIdUploadStatus(req, res);
+// });
 
 module.exports = router;
