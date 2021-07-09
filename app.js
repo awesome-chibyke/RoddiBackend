@@ -14,11 +14,19 @@ const IdUploadRoute = require("./routes/IdUploadRoute");
 const ForgetPasswordRoute = require("./routes/ForgetPasswordRoute");
 const TwoFactorSetupRoutes = require("./routes/TwoFactorSetupRoutes");
 
+<<<<<<< HEAD
 const SettingsRoutes = require("./routes/SettingsRoute");
 var device = require("express-device");
 
 const AdminUserRoute = require("./routes/AdminUserRoute");
 var device = require('express-device');
+=======
+const AdminUserRoute = require("./routes/AdminUserRoute");
+var device = require('express-device');
+
+const SettingsRoutes = require("./routes/SettingsRoute");
+var device = require("express-device");
+>>>>>>> 20bd63349e9308e565ec231eed96e5e213e36f09
 
 //require cors
 var cors = require("cors");
