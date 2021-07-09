@@ -197,15 +197,6 @@ class EditController {
         throw new Error("User does not exist");
       }
 
-      if (userObject.profile_update_watch !== "none") {
-        throw new Error(
-          "You have used up your chances for profile, please contact admin for further explanations"
-        );
-      }
-
-      //get the current date
-      let currentDateTime = date.format(this.now, "YYYY-MM-DD HH:mm:ss");
-
       //update the user
       userObject.first_name = req.body.first_name || userObject.first_name;
       userObject.middle_name = req.body.middle_name;
@@ -219,30 +210,11 @@ class EditController {
         parseFloat(userObject.account_verification_level) +
         parseFloat(
           this.AccountVerificationLevels.profile_update_verification_level
-        ); //bring the profile update level
-      userObject.profile_update_watch = currentDateTime; //bring the profile update level
+        ); //bring the profile update level //bring the profile update level
       userObject.account_verification_step =
         this.AccountVerificationLevels.profile_update_verification_step; //bring the profile update level
 
       let updatedUserObject = await this.User.updateUser(userObject);
-
-      let settingsDetails = await this.Settings.selectSettings([
-        ["id", "=", 1],
-      ]);
-      let message =
-        "Your have successfully updated your profile. Please note that further update of your profile can only be done by contacting the " +
-        settingsDetails.site_name +
-        " Support";
-
-      //send an email to the user
-      await this.sendEmailForForSuccessfulProfileEdit(
-        userObject,
-        message,
-        settingsDetails
-      );
-
-      //send sms to the user
-      await this.sendSmsForUser(userObject, message);
 
       //return value to view
       this.responseObject.setStatus(true);
@@ -259,43 +231,6 @@ class EditController {
       });
       res.json(this.responseObject.sendToView());
     }
-  }
-
-  //do the actual mail sending to the users account
-  async sendEmailForForSuccessfulProfileEdit(
-    userObject,
-    message,
-    settingsDetails
-  ) {
-    //get the template for the mail
-    let emailSubject = "Successful Update of Profile";
-    let fullName = this.User.returnFullName(userObject);
-    let mailSender = sendGenericMails(
-      userObject,
-      fullName,
-      settingsDetails,
-      emailSubject,
-      message
-    );
-    return mailSender;
-  }
-
-  //send the sms to the user
-  async sendSmsForUser(userObject, message) {
-    var accountSid = process.env.TWILIO_ACCOUNT_SID; //twillo accoun details
-    var authToken = process.env.TWILIO_AUTH_TOKEN;
-
-    var client = new twilio(accountSid, authToken);
-
-    client.messages
-      .create({
-        body: message,
-        to: userObject.phone,
-        from: process.env.TWILIO_PHONE_NUMBER,
-      })
-      .then((message) => {
-        return message;
-      });
   }
 
   async manageUserAccount(req, res) {
@@ -448,6 +383,7 @@ class EditController {
             updatedUserObject,
             "declined"
           );
+          console.log(this.sendMessages)
         }
 
         updatedUserObject = await this.User.updateUser(objectsForUpdate); //update user

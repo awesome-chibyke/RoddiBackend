@@ -52,9 +52,10 @@ class UserController {
         unique_id: userObject.unique_id,
         email_verification: currenctDate,
         updated_at: currenctDate,
-        account_verification_level: parseFloat(userObject.account_verification_level) + parseFloat(this.AccountVerificationLevels.account_activation_verification_level),
+        account_verification_level:  this.AccountVerificationLevels.account_activation_verification_level,
         account_verification_step: this.AccountVerificationLevels.account_activation_verification_step
       });
+
 
       //send a successful account activation mail to the user
       let welcomeEmail =
