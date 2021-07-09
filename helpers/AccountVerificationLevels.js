@@ -7,6 +7,7 @@ class AccountVerificationLevels {
         this.face_verification_level = 20;
         this.id_verification_level = 30;
 
+        //verification steps
         this.account_activation_verification_step = 'account_activation';
         this.profile_update_verification_step = 'profile_update';
         this.phone_verification_step = 'phone_verification';

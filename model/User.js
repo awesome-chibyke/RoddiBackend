@@ -13,25 +13,25 @@ class User {
   }
 
 
-  async selectAllUsersWhere(conditions){
+  async selectAllUsersWhere(conditions, filterDeletedRow = 'yes'){
     ////[["unique_id", "=", Currency]]
     let allUsers = await this.DbActions.selectBulkData("users", {
       filteringConditions: conditions,
-    });
-    if (allUsers.length == 0) {
+    }, filterDeletedRow);
+    /*if (allUsers.length == 0) {
       return false;
-    }
+    }*/
     return allUsers;
   }
 
-  async selectAllUsers(conditions = []){
+  async selectAllUsers(conditions = [], filterDeletedRows = 'yes'){
     ////[["unique_id", "=", Currency]]
     let allUsers = await this.DbActions.selectAllData("users", {
       filteringConditions: conditions,
-    });
-    if (allUsers.length == 0) {
+    }, filterDeletedRows);
+    /*if (allUsers.length == 0) {
       return false;
-    }
+    }*/
     return allUsers;
   }
 
@@ -58,26 +58,28 @@ class User {
     return fullName;
   }
 
-  async selectOneUser(conditions) {
+  async selectOneUser(conditions, filterDeletedRows = 'yes') {
     //conditions = [["email", "=", email]];
     let userObject = await this.DbActions.selectSingleRow("users", {
       filteringConditions: conditions,
-    });
+    },filterDeletedRows);
     if (typeof userObject === "undefined") {
       return false;
     }
     return userObject;
   }
 
-  async returnUserForView(userObj) {
-    delete userObj.password;
-    delete userObj.password;
+  async returnUserForView(userObj, userType = 'user') {
+    if(userType === 'user'){
+      delete userObj.document_number;
+    }
     delete userObj.two_factor_temp_secret;
     delete userObj.two_factor_secret;
-    delete userObj.document_number;
+    delete userObj.password;
     userObj.currency_details = await this.fetchUserCurrency(userObj.preferred_currency);
     userObj.verifiation_details_object = this.AccountVerificationLevels.verifiation_details;
     userObj.current_verification_step = this.AccountVerificationLevels.checkUserVerificationStep(userObj);
+
     return userObj;
   }
 
