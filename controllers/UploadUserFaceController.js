@@ -67,6 +67,10 @@ class IdentityUploadController {
                 throw new Error(ErrorMessage);
             }
 
+            if(userObject.profile_update_watch === 'none'){
+                throw new Error('Please carry out your profile update first');
+              }
+
             if(userObject.face_upload_status === this.AccountVerificationLevels.id_face_pending){
                 //unlink the files
                 await unlinkAsync(oldPathForDisplay);
