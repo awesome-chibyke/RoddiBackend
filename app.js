@@ -2,6 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 // Load env vars
 dotenv.config({ path: "./config/config.env" });
+const http = require('http');//for socket.io
 
 //routes area
 const login = require("./routes/Login");
@@ -18,7 +19,6 @@ const TwoFactorSetupRoutes = require("./routes/TwoFactorSetupRoutes");
 const AdminUserRoute = require("./routes/AdminUserRoute");
 const TestRoutes = require("./routes/TestRoutes");
 const roleManagementRoutes = require("./routes/roleManagementRoutes");
-var device = require('express-device');
 
 
 const SettingsRoutes = require("./routes/SettingsRoute");
@@ -29,6 +29,10 @@ var cors = require("cors");
 
 const app = express();
 const port = 3400;
+
+const server = http.createServer(app);//start up socket.io
+const { Server } = require("socket.io");
+const io = new Server(server);
 
 app.use(cors());
 app.use(device.capture());
@@ -56,6 +60,14 @@ app.use("/settings", SettingsRoutes);
 app.use("/users", AdminUserRoute);//two factor routes
 app.use("/roles_management", roleManagementRoutes);//two factor routes
 
+io.on('connection', (socket) => {
+  console.log('a user connected');
+});
+
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
+});
+
+server.listen(3000, () => {
+  console.log('listening on *:4000');
 });
