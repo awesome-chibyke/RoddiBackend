@@ -28,7 +28,7 @@ class Settings {
     return {
       "id": 1,
       "unique_id": "w6laqzt48i4ulj200ief",
-      "site_name": "Rooddi",
+      "site_name": process.env.APP_NAME,
       "address1": "No 3 Kenyetta Street Uwani",
       "address2": "No 3 Kenyetta Street Uwani",
       "email1": "info@rooddi.com",

@@ -112,7 +112,7 @@ router.use(function (err, req, res, next) {
   });
 });
 
-router.get("/get_all_currency", verifyToken, async (req, res) => {
+router.get("/get_all_currency", async (req, res) => {
   CurrencyController.getCurrency(req, res);
 });
 
