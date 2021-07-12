@@ -65,6 +65,10 @@ class EditController {
         throw  new Error(ErrorMessage);
       }
 
+      if(userObject.phone_verification === 'null'){
+        throw new Error('Please carry out your phone verification step first');
+      }
+
       if(userObject.profile_update_watch !== 'none'){
         let ErrorMessage = this.ErrorMessages.ErrorMessageObjects.profile_update_chances;
         throw new Error(ErrorMessage);

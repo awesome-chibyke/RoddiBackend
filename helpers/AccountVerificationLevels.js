@@ -16,7 +16,7 @@ class AccountVerificationLevels {
         this.completed = 'completed';
 
 
-        this.verificationSteps = ['none', this.account_activation_verification_step, this.profile_update_verification_step, this.phone_verification_step, this.face_verification_step, this.id_verification_step, this.completed];
+        this.verificationSteps = ['none', this.account_activation_verification_step, this.phone_verification_step, this.profile_update_verification_step,  this.face_verification_step, this.id_verification_step, this.completed];
 
         this.verifiation_details = {
             account_activation_verification_level:this.account_activation_verification_level,
