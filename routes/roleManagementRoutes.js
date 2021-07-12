@@ -40,6 +40,11 @@ router.post("/add_new_type_of_user", verifyToken, async (req, res) => {
     TypeOfUserController.storeTypeOfUsers(req, res);
 });
 
+//get all type of users
+router.post("/get_type_of_user", verifyToken, async (req, res) => {
+    TypeOfUserController.storeTypeOfUsers(req, res);
+});
+
 //get all the available type of users
 router.get("/display_privileges", verifyToken, async (req, res) => {
     PrivilegeController.getAllPrivileges(req, res);
