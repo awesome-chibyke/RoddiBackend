@@ -16,22 +16,24 @@ class AccountVerificationLevels {
         this.completed = 'completed';
 
         this.verificationSteps = ['none', this.account_activation_verification_step, this.profile_update_verification_step, this.phone_verification_step, this.face_verification_step, this.id_verification_step, this.completed];
+
         this.verifiation_details = {
             account_activation_verification_level:this.account_activation_verification_level,
             profile_update_verification_level:this.profile_update_verification_level,
             phone_verification_level:this.phone_verification_level,
             face_verification_level:this.face_verification_level,
             id_verification_level:this.id_verification_level,
-            verification_steps:this.verificationSteps
+            verification_steps:this.verificationSteps,
+            // verification_steps:this.verificationStatus
         }
 
 
-        //upload status for id
+        //upload status for id upload
         this.id_upload_pending = 'under_review';
         this.id_upload_confirmed = 'confirmed';
         this.id_upload_declined = 'declined';
 
-        //upload status for id
+        //upload status for face upload
         this.id_face_pending = 'under_review';
         this.id_face_confirmed = 'confirmed';
         this.id_face_declined = 'declined';
