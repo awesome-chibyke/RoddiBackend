@@ -27,10 +27,6 @@ class CurrencyController {
 
   async getCurrency(req, res) {
     try {
-      //authenticate user
-      let userObject = await authData(req);
-      userObject = userObject.user;
-
       let allCurrency = await this.Currency.getAllCurrency();
       if (allCurrency === false) {
         throw new Error("No Data Was returned");
