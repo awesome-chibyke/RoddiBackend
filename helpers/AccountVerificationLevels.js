@@ -2,24 +2,24 @@ class AccountVerificationLevels {
     constructor (){
         //verification levels
         this.account_activation_verification_level = 10;
-        this.profile_update_verification_level = 20;
         this.phone_verification_level = 20;
+        this.profile_update_verification_level = 20;
         this.face_verification_level = 20;
         this.id_verification_level = 30;
 
         //verification steps
         this.account_activation_verification_step = 'account_activation';
-        this.profile_update_verification_step = 'profile_update';
         this.phone_verification_step = 'phone_verification';
+        this.profile_update_verification_step = 'profile_update';
         this.face_verification_step = 'face_verification';
         this.id_verification_step = 'id_verification';
 
-        this.verificationSteps = ['none', this.account_activation_verification_step, this.profile_update_verification_step, this.phone_verification_step, this.face_verification_step, this.id_verification_step];
+        this.verificationSteps = ['none', this.account_activation_verification_step, this.phone_verification_step, this.profile_update_verification_step,  this.face_verification_step, this.id_verification_step];
 
         this.verifiation_details = {
             account_activation_verification_level:this.account_activation_verification_level,
-            profile_update_verification_level:this.profile_update_verification_level,
             phone_verification_level:this.phone_verification_level,
+            profile_update_verification_level:this.profile_update_verification_level,
             face_verification_level:this.face_verification_level,
             id_verification_level:this.id_verification_level,
             verification_steps:this.verificationSteps,
