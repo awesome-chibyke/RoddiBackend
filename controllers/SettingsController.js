@@ -140,6 +140,24 @@ class SettingsController {
       res.json(this.responseObject.sendToView());
     }
   }
+
+  async selectSettings(){
+    try{
+      //select the settings
+      let settings = await this.Settings.selectSettings([
+          ['id', '=', 1]
+      ]);
+      this.responseObject.setData(settings);
+      res.json(this.responseObject.sendToView());
+
+    }catch(err){
+      this.responseObject.setStatus(false);
+      this.responseObject.setMessage({
+        general_error: [ErrorHandler(err)],
+      });
+      res.json(this.responseObject.sendToView());
+    }
+  }
 }
 
 module.exports = SettingsController;
