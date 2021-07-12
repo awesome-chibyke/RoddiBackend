@@ -284,7 +284,7 @@ class EditController {
                 this.responseObject.setStatus(true);
                 let userDataForView = await this.User.returnUserForView(updatedUserObject, loggedUser.type_of_user);
                 this.responseObject.setData({user:userDataForView});
-                this.responseObject.setMessage("You have successfully uploaded your ID, please wait while we review the document");
+                this.responseObject.setMessage("Update was successful");
                 res.json(this.responseObject.sendToView());
 
             }else{

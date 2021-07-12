@@ -2,13 +2,11 @@ var express = require("express");
 let responseObject = require("../controllers/ViewController");
 let IdentityUploadController = require("../controllers/IdentityUploadController");
 const verifyToken = require("../helpers/CheckTokenExistense");
-const {storage, fileFilter, limits} = require('../helpers/FileUploadHelpers');
+//const {storage, fileFilter, limits} = require('../helpers/FileUploadHelpers');
+const uploadFile = require('../helpers/uploadDp');
+const uploadId = require('../helpers/uploadId');
 let multer = require("multer");
-
-responseObject = new responseObject();
-
-// Instantiate Functions
-IdentityUploadController = new IdentityUploadController();
+let UploadUserFaceController = require("../controllers/UploadUserFaceController");
 
 // Call Express
 var router = express.Router();
@@ -19,17 +17,31 @@ router.use(
     })
 );
 
-let maxSize = 2000000;
+responseObject = new responseObject();
 
-//bring in multer for the upload of the id document
-var upload = multer({ storage: storage('./files/uploads/'), fileFilter:fileFilter(['png', 'jpg', 'jpeg', 'gif']), limits: { fileSize: maxSize } });
+// Instantiate Functions
+UploadUserFaceController = new UploadUserFaceController();
+IdentityUploadController = new IdentityUploadController();
 
 router.route("/upload_id_card")
-/* replace foo-bar with your form field-name verifyToken *///upload.single("upload_id_card")
-    .post(verifyToken, upload.fields([{ name: 'upload_id_card_back', maxCount: 1 }, { name: 'upload_id_card_front', maxCount: 1 }]), function(req, res){
-        IdentityUploadController.uploadIdCard(req, res);
+/* replace foo-bar with your form field-name verifyToken */
+    .post(verifyToken, uploadId, function(req, res){
+        //return res.json(req.file);
     }, (error, req, res, next) => {
 
+        res.status(400).send({ error: error.message });
+        responseObject.setMessage({
+            general_error: [error.message],
+        });
+        res.json(responseObject.sendToView());
+
+    });
+
+router.route("/upload_face_id")
+/* replace foo-bar with your form field-name verifyToken */
+    .post(verifyToken, uploadFile, function(req, res){
+        //return res.json(req.file);
+    }, (error, req, res, next) => {
 
         res.status(400).send({ error: error.message });
         responseObject.setMessage({

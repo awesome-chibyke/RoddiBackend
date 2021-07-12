@@ -13,22 +13,19 @@ class User {
   }
 
 
-  async selectAllUsersWhere(conditions, filterDeletedRow = 'yes'){
+  async selectAllUsersWhere(conditions, filterDeletedRow = 'yes', destroy = "no", orderByColumns = 'id', orderByDirection = 'desc'){
     ////[["unique_id", "=", Currency]]
-    let allUsers = await this.DbActions.selectBulkData("users", {
-      filteringConditions: conditions,
-    }, filterDeletedRow);
+    let allUsers = await this.DbActions.selectBulkData("users", {filteringConditions: conditions}, filterDeletedRow, destroy, orderByColumns, orderByDirection);
     /*if (allUsers.length == 0) {
       return false;
     }*/
     return allUsers;
   }
 
-  async selectAllUsers(conditions = [], filterDeletedRows = 'yes'){
+  async selectAllUsers(conditions = [], filterDeletedRows = 'yes', destroy = "no", orderByColumns = 'id', orderByDirection = 'desc'){
     ////[["unique_id", "=", Currency]]
     let allUsers = await this.DbActions.selectAllData("users", {
-      filteringConditions: conditions,
-    }, filterDeletedRows);
+      filteringConditions: conditions}, filterDeletedRows, destroy, orderByColumns, orderByDirection);
     /*if (allUsers.length == 0) {
       return false;
     }*/

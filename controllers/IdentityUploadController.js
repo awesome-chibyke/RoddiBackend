@@ -85,19 +85,22 @@ class IdentityUploadController {
                 //unlink the files
                 await unlinkAsync(oldPathForFrontDisplay);
                 await unlinkAsync(oldPathForBackDisplay);
-                throw new Error('your uploaded document is still under review');
+                let ErrorMessage = this.ErrorMessages.ErrorMessageObjects.document_under_review;
+                throw new Error(ErrorMessage);
             }
 
             if(userObject.id_upload_status === this.AccountVerificationLevels.id_upload_confirmed){
                 //unlink the files
                 await unlinkAsync(oldPathForFrontDisplay);
                 await unlinkAsync(oldPathForBackDisplay);
-                throw new Error('your ID has been confirmed');
+                let ErrorMessage = this.ErrorMessages.ErrorMessageObjects.id_confirmed;
+                throw new Error(ErrorMessage);
             }
 
             //show the user that file upload failed
             if(typeof req.files === "undefined"){
-                throw new Error('File Upload failed');
+                let ErrorMessage = this.ErrorMessages.ErrorMessageObjects.file_upload_failed;
+                throw new Error(ErrorMessage);
             }
 
             //move the files to the new path
@@ -109,6 +112,7 @@ class IdentityUploadController {
             let updatedUserData = await this.User.updateUser({
                 unique_id: userObject.unique_id,
                 id_upload_status: this.AccountVerificationLevels.id_upload_pending,
+                account_verification_step:this.AccountVerificationLevels.id_verification_step,
                 id_name:filenameForFrontDisplay,
                 id_back_name: filenameForBackDisplay,
                 document_number:documentNumber,
@@ -133,10 +137,6 @@ class IdentityUploadController {
             res.json(this.responseObject.sendToView());
         }
 
-    }
-
-    callback(err) {
-        console.log(err)
     }
 
   //mail sending function

@@ -6,6 +6,7 @@ const ErrorHandler = require("../helpers/ErrorHandler");
 const User = require("../model/User");
 const date = require("date-and-time");
 const validator = require("../helpers/validator");
+const ErrorMessages = require("../helpers/ErrorMessages");
 const Settings = require("../model/Settings");
 const twilio = require("twilio");
 const {sendGenericMails} = require("../Emails/GenericMailSender");
@@ -17,6 +18,7 @@ class EditController {
     this.AuthenticationCode = new AuthenticationCode();
     this.now = new Date();
     this.Settings = new Settings();
+    this.ErrorMessages = new ErrorMessages();
     this.AccountVerificationLevels = new AccountVerificationLevels();
     this.errorMessage = "";
     this.errorStatus = true;
@@ -59,11 +61,13 @@ class EditController {
           ['unique_id', '=', userObject.user.unique_id]
       ]);
       if(userObject === false){
-        throw  new Error('User does not exist');
+        let ErrorMessage = this.ErrorMessages.ErrorMessageObjects.authentication_failed;
+        throw  new Error(ErrorMessage);
       }
 
       if(userObject.profile_update_watch !== 'none'){
-        throw new Error('You have used up your chances for profile, please contact admin for further explanations');
+        let ErrorMessage = this.ErrorMessages.ErrorMessageObjects.profile_update_chances;
+        throw new Error(ErrorMessage);
       }
 
       //get the current date
