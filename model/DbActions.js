@@ -17,7 +17,9 @@ class DbActions {
     tableName,
     options = { fields: [], filteringConditions: [] },
     filterDeletedRows = "yes",
-    destroy = "no"
+    destroy = "no",
+    orderByColumns = 'id',
+    orderByDirection = 'desc'
   ) {
     const { fields, filteringConditions } = options;
 
@@ -31,6 +33,7 @@ class DbActions {
     if (filterDeletedRows === "yes") {
       bulkDataSelector.havingNull("deleted_at");
     }
+    bulkDataSelector.orderBy(orderByColumns, orderByDirection);
     bulkDataSelector.then((data) => data);
 
     if (destroy === "yes") {
@@ -44,7 +47,9 @@ class DbActions {
     tableName,
     options = { fields: [], filteringConditions: [] },
     filterDeletedRows = "yes",
-    destroy = "no"
+    destroy = "no",
+    orderByColumns = 'id',
+    orderByDirection = 'desc'
   ) {
     const { fields, filteringConditions } = options;
 
@@ -53,6 +58,7 @@ class DbActions {
     if (filterDeletedRows === "yes") {
       bulkDataSelector.havingNull("deleted_at");
     }
+    bulkDataSelector.orderBy(orderByColumns, orderByDirection);
     bulkDataSelector.then((data) => data);
 
     if (destroy === "yes") {

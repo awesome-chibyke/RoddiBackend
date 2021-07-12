@@ -9,6 +9,11 @@ class ErrorMessages {
             phone_already_verified:"Phone Number has been been already verified",
             authentication_failed:"User Authentication Failed",
             invalid_action:"Invalid User management action",
+            document_under_review:'your uploaded document is still under review',
+            id_confirmed:'your ID has been confirmed',
+            file_upload_failed:'File Upload failed',//for failed file upload
+            profile_update_chances:'You have used up your chances for profile, please contact admin for further explanations',//for failed file upload
+            type_of_user_exist:'type of user already exist',//for existing type of user
         }
     }
 }

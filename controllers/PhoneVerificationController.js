@@ -59,6 +59,14 @@ class PhoneVerifyController {
       //check if the phone number already exist
       let phoneNumberExistence = await this.User.selectOneUser([["phone", "=", phone], ['country_code', '=', country_code]]);
       if (phoneNumberExistence !== false) {
+        if(phoneNumberExistence.phone !== null && phoneNumberExistence.phone_verification === null){
+          // send verification sms
+          await this.SendVerificationCode.sendSms(phoneNumberExistence);
+          //set message type
+          let messageType = this.MessageType.returnMessageType('phone_number_exists');
+          this.responseObject.setMesageType(messageType);
+        }
+
         let errorMessage = this.ErrorMessages.ErrorMessageObjects.phone_number_exists;
         throw new Error(errorMessage);
       }
@@ -89,11 +97,12 @@ class PhoneVerifyController {
       let sendSms = await this.SendVerificationCode.sendSms(updatedUserObject);
 
       this.responseObject.setStatus(true);
+      let messageType = this.MessageType.returnMessageType('phone_verification');//return the message type
+      this.responseObject.setMesageType(messageType);
       this.responseObject.setMessage(
         "A verification code has been sent to the phone number provided, please provide code to verify your phone number"
       );
-      let userObjectForView = await this.User.returnUserForView(updatedUserObject);
-      this.responseObject.setData({user:userObjectForView});
+      this.responseObject.setData({phone:phone, country_code:country_code});
       res.json(this.responseObject.sendToView());
 
       //send the
@@ -142,13 +151,12 @@ class PhoneVerifyController {
       let sendSms = await this.SendVerificationCode.sendSms(userObject);
 
       this.responseObject.setStatus(true);
-      let messageType = this.MessageType.returnMessageType('normal'); //return the message type
+      let messageType = this.MessageType.returnMessageType('phone_verification');//return the message type
       this.responseObject.setMesageType(messageType);
       this.responseObject.setMessage(
           "Phone number verification token has been sent to your phone number, provide code to verify phone number"
       );
-      let userObjectForView = await this.User.returnUserForView(userObject);
-      this.responseObject.setData({user:userObjectForView});
+      this.responseObject.setData({phone:phone, country_code:country_code});
       res.json(this.responseObject.sendToView());
 
       //send the

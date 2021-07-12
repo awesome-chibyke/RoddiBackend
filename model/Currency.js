@@ -21,6 +21,7 @@ class Currency {
       return false;
     }
     return currency;
+
   }
 
   getAllNeededCurrency(currency_rate_details) {
