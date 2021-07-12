@@ -141,7 +141,7 @@ class SettingsController {
     }
   }
 
-  async selectSettings(){
+  async selectSettings(req, res){
     try{
       //select the settings
       let settings = await this.Settings.selectSettings([

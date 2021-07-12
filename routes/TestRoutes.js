@@ -1,10 +1,10 @@
 var express = require("express");
 //let responseObject = require("../controllers/ViewController");
-let PrivilegeController = require("../controllers/AdminControllers/PrivilegeController");
+let SettingsController = require("../controllers/SettingsController");
 
 // Instantiate Functions
 //responseObject = new responseObject();
-PrivilegeController = new PrivilegeController();
+SettingsController = new SettingsController();
 // Call Express
 var router = express.Router();
 
@@ -16,7 +16,7 @@ router.use(
 
 //return the user object
 router.get("/get_settings", async (req, res) => {
-    PrivilegeController.selectAllPrivileges(req, res);
+    SettingsController.selectSettings(req, res);
 });
 
 module.exports = router;
