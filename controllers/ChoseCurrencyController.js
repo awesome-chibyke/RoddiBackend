@@ -67,12 +67,14 @@ class CurrencyController {
       const preferred_currency = req.body.preferred_currency;
 
       // update the user preferred currency
-      await this.User.updateUser({
+      let updatedUserObject = await this.User.updateUser({
         unique_id: userObject.unique_id,
         preferred_currency: preferred_currency,
       });
 
       this.responseObject.setStatus(true);
+      let userObjectForView = await this.User.returnUserForView(updatedUserObject);
+      this.responseObject.setData({user:userObjectForView});
       this.responseObject.setMessage("Preferred Currency Has Been Updated");
       res.json(this.responseObject.sendToView());
     } catch (e) {
