@@ -15,7 +15,7 @@ router.use(
 );
 
 //return the user object
-router.get("/get_privileges", async (req, res) => {
+router.get("/get_settings", async (req, res) => {
     PrivilegeController.selectAllPrivileges(req, res);
 });
 
