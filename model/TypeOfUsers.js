@@ -1,20 +1,32 @@
 const DbActions = require("../model/DbActions");
 const Settings = require("./Settings");
 const ErrorHandler = require("../helpers/ErrorHandler");
+const fs = require("fs");
 
 class TypeOfUsers {
     constructor(){
         this.DbActions = new DbActions();
         this.Settings = new Settings();
+        this.typeOfUserArray = [];
+        this.TypeOfUserFilePath = './files/roles_manager/roles.json';
     }
 
-    async selectAllTypeOfUsersWhere(conditions, filterDeletedRow = 'yes', destroy = "no", orderByColumns = 'id', orderByDirection = 'desc'){
-        ////[["unique_id", "=", Currency]]
-        let allRoles = await this.DbActions.selectBulkData("type_of_user_tb", {
-            filteringConditions: conditions,
-        }, filterDeletedRow, destroy, orderByColumns, orderByDirection);
-        return allRoles;
-    }
+    // async selectAllTypeOfUsersWhere(conditions, filterDeletedRow = 'yes', destroy = "no", orderByColumns = 'id', orderByDirection = 'desc'){
+    //     ////[["unique_id", "=", Currency]]
+    //     let allRoles = await this.DbActions.selectBulkData("type_of_user_tb", {
+    //         filteringConditions: conditions,
+    //     }, filterDeletedRow, destroy, orderByColumns, orderByDirection);
+    //     return allRoles;
+    // }
+
+    async selectAllTypeOfUsersWhere(conditions) {
+        let thePath = this.TypeOfUserFilePath;//role json file path
+    
+        let existingTypeOfUserArray = fs.readFileSync(thePath);//reading the file
+        existingTypeOfUserArray = JSON.parse(existingTypeOfUserArray);
+    
+        return existingTypeOfUserArray;
+      }
 
     async selectAllTypeOfUsers(conditions = [], filterDeletedRows = 'yes', destroy = "no", orderByColumns = 'id', orderByDirection = 'desc'){
         ////[["unique_id", "=", Currency]]
@@ -23,6 +35,15 @@ class TypeOfUsers {
         }, filterDeletedRows, destroy, orderByColumns, orderByDirection);
         return allRoles;
     }
+
+    async selectAllTypeOfUsers(conditions) {
+        let thePath = this.TypeOfUserFilePath;//role json file path
+    
+        let existingTypeOfUserArray = fs.readFileSync(thePath);//reading the file
+        existingTypeOfUserArray = JSON.parse(existingTypeOfUserArray);
+    
+        return existingTypeOfUserArray;
+      }
 
     async selectOneTypeOfUser(conditions, filterDeletedRows = 'yes') {
         //conditions = [["email", "=", email]];

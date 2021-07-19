@@ -1,11 +1,80 @@
 {
   "roles":[
-    {"unique_id":"","role":"","description":"","deleted_at":null,"created_at":'',"updated_at":""},
+    {
+      "unique_id":"1c0j6h8qxfgk5itflakq",
+      "role":"manage_roles",
+      "description":"user gets access to the role management area",
+      "deleted_at":null,
+      "created_at":"2021-07-10T13:40:53.000Z",
+      "updated_at":"2021-07-10T13:40:53.000Z"
+    }
   ],
   "type_of_users":[
-
+    {
+      "id": 4,
+      "unique_id": "oqsi4mgom8q8g8is7xya",
+      "type_of_user": "super-admin",
+      "description": "the main and highest level of admin in the system",
+      "deleted_at": null,
+      "created_at": "2021-07-10T16:26:23.000Z",
+      "updated_at": "2021-07-10T16:26:23.000Z"
+  },
+  {
+      "id": 3,
+      "unique_id": "itkcxmvw60xvkpxthogp",
+      "type_of_user": "mid-admin",
+      "description": "mid level of admin in the system",
+      "deleted_at": null,
+      "created_at": "2021-07-10T16:25:45.000Z",
+      "updated_at": "2021-07-10T16:25:45.000Z"
+  },
+  {
+      "id": 2,
+      "unique_id": "8n6x48qwblvfa2hx3ruf",
+      "type_of_user": "admin",
+      "description": "Lowest level of admin in the system",
+      "deleted_at": null,
+      "created_at": "2021-07-10T16:25:13.000Z",
+      "updated_at": "2021-07-10T16:25:13.000Z"
+  },
+  {
+      "id": 1,
+      "unique_id": "7ov8pldpct4z0l9hkgxb",
+      "type_of_user": "user",
+      "description": "The normal user in the system",
+      "deleted_at": null,
+      "created_at": "2021-07-10T16:14:50.000Z",
+      "updated_at": "2021-07-10T16:14:50.000Z"
+  }
   ],
   "privileges":[
-
+    {
+      "type_of_user_unique_id": "oqsi4mgom8q8g8is7xya",
+      "type_of_user": "super-admin",
+      "role_unique_id": "1c0j6h8qxfgk5itflakq",
+      "role": "manage_roles",
+      "status": "inactive"
+  },
+  {
+      "type_of_user_unique_id": "itkcxmvw60xvkpxthogp",
+      "type_of_user": "mid-admin",
+      "role_unique_id": "1c0j6h8qxfgk5itflakq",
+      "role": "manage_roles",
+      "status": "inactive"
+  },
+  {
+      "type_of_user_unique_id": "8n6x48qwblvfa2hx3ruf",
+      "type_of_user": "admin",
+      "role_unique_id": "1c0j6h8qxfgk5itflakq",
+      "role": "manage_roles",
+      "status": "inactive"
+  },
+  {
+      "type_of_user_unique_id": "7ov8pldpct4z0l9hkgxb",
+      "type_of_user": "user",
+      "role_unique_id": "1c0j6h8qxfgk5itflakq",
+      "role": "manage_roles",
+      "status": "inactive"
+  }
   ]
 }

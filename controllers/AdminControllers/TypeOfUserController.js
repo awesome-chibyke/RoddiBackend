@@ -10,6 +10,7 @@ const TypeOfUsers = require("../../model/TypeOfUsers");
 const authData = require("../../helpers/AuthenticateLogin");
 const validator = require("../../helpers/validator");
 const ErrorMessages = require("../../helpers/ErrorMessages");
+const fs = require("fs");
 
 class TypeOfUserController {
     constructor(){
@@ -23,6 +24,7 @@ class TypeOfUserController {
         this.User = new User();
         this.TypeOfUsers = new TypeOfUsers();
         this.ErrorMessages = new ErrorMessages();
+        this.TypeOfUserFilePath = this.TypeOfUsers.TypeOfUserFilePath;
     }
 
     valdateFunction(req, ValidationRule) {
@@ -112,15 +114,16 @@ class TypeOfUserController {
     async selectAllTypeOfUsers(req, res){
 
         try{
-
+            let thePath = this.TypeOfUserFilePath;
             //select the all the roles
-            let TypeOfUsers = await this.TypeOfUsers.selectAllTypeOfUsers();
+            let existingTypeOfUserArray = fs.readFileSync(thePath);
+            existingTypeOfUserArray = JSON.parse(existingTypeOfUserArray);
 
             //send details to view
             this.responseObject.setStatus(true);
             this.responseObject.setMessage("Role was successfully added");
             this.responseObject.setData({
-                type_of_users: TypeOfUsers
+                type_of_users: existingTypeOfUserArray.type_of_users
             });
             res.json(this.responseObject.sendToView());
 

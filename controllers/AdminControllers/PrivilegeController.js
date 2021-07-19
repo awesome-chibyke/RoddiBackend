@@ -12,6 +12,7 @@ const Priviledges = require("../../model/Priviledges");
 const TypeOfUsers = require("../../model/TypeOfUsers");
 const authData = require("../../helpers/AuthenticateLogin");
 const validator = require("../../helpers/validator");
+const fs = require("fs");
 
 class PrivilegeController {
     constructor(){
@@ -27,6 +28,7 @@ class PrivilegeController {
         this.Priviledges = new Priviledges();
         this.TypeOfUsers = new TypeOfUsers();
         this.ErrorMessages = new ErrorMessages();
+        this.PriviledgesFilePath = this.Priviledges.PriviledgesFilePath;
     }
 
     valdateFunction(req, ValidationRule) {
@@ -162,14 +164,17 @@ class PrivilegeController {
     async getAllPrivileges(req, res){
 
         try{
-
-            let roleSummaryObject = await this.selectAllPrivilege();
+            let thePath = this.PriviledgesFilePath;
+            //select the all the roles
+            let existingPriviledgeArray = fs.readFileSync(thePath);
+            existingPriviledgeArray = JSON.parse(existingPriviledgeArray);
+            
 
             //send details to view
             this.responseObject.setStatus(true);
             this.responseObject.setMessage("Role management details was successfully returned");
             this.responseObject.setData({
-                roles: roleSummaryObject
+                priviledges: existingPriviledgeArray.privileges
             });
             res.json(this.responseObject.sendToView());
 
