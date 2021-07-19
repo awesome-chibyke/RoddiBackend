@@ -1,8 +1,10 @@
 const express = require("express");
 const dotenv = require("dotenv");
+const expressip = require('express-ip');
 // Load env vars
 dotenv.config({ path: "./config/config.env" });
 const http = require('http');//for socket.io
+var isoCountryCurrency = require("iso-country-currency")
 
 //routes area
 const login = require("./routes/Login");
@@ -19,6 +21,7 @@ const TwoFactorSetupRoutes = require("./routes/TwoFactorSetupRoutes");
 const AdminUserRoute = require("./routes/AdminUserRoute");
 const TestRoutes = require("./routes/TestRoutes");
 const roleManagementRoutes = require("./routes/roleManagementRoutes");
+const CurrencyRoutes = require("./routes/CurrencyRoutes");
 
 
 const SettingsRoutes = require("./routes/SettingsRoute");
@@ -39,9 +42,11 @@ app.use(device.capture());
 
 app.use(express.static("files"));
 
-// app.use("/", (req, res) => {
-//   console.log(req.device);
-// });
+app.use(expressip().getIpInfoMiddleware);
+
+/*app.use("/", async (req, res) => {
+    res.json(req.ipInfo);
+ });*/
 app.use("/login", login);
 app.use("/register", register);
 app.use("/home", home);
@@ -59,15 +64,19 @@ app.use("/settings", SettingsRoutes);
 //admin routes
 app.use("/users", AdminUserRoute);//two factor routes
 app.use("/roles_management", roleManagementRoutes);//two factor routes
+app.use("/currency", CurrencyRoutes);//two factor routes
 
 io.on('connection', (socket) => {
-  console.log('a user connected');
+    console.log('a user connected');
+    socket.on('disconnect', () => {
+        console.log('user disconnected');
+    });
 });
 
-app.listen(port, () => {
+/*app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
-});
+});*/
 
-server.listen(3000, () => {
-  console.log('listening on *:4000');
+server.listen(port, () => {
+  console.log(`listening on *:${port}`);
 });

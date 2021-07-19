@@ -43,6 +43,10 @@ class TwoFactorController {
       //authenticate user
       let userObject = await authData(req);
       userObject = await this.User.selectOneUser([["unique_id", "=", userObject.user.unique_id]]);
+      if (userObject === false) {
+        let ErrorMessage = this.ErrorMessages.ErrorMessageObjects.authentication_failed
+        throw new Error(ErrorMessage);
+      }
 
       let settings = await this.Settings.selectSettings([["id", "=", 1]]);
       if (settings === false) {
@@ -70,7 +74,7 @@ class TwoFactorController {
         res.status(200).json({
           status: true,
           message: "Token was successfully created",
-          data: { bar_code_data: data_url },
+          data: { bar_code_data: data_url, otpauth_url:secret.otpauth_url },
           message_type: "normal"
         });
       });
@@ -98,7 +102,7 @@ class TwoFactorController {
         ["unique_id", "=", userObject.user.unique_id],
       ]);
       if (selectedUserObject === false) {
-        let errorMessage = this.ErrorMessages.ErrorMessageObjects.invalid_user
+        let errorMessage = this.ErrorMessages.ErrorMessageObjects.authentication_failed
         throw new Error(errorMessage);
       }
       let base32secret = selectedUserObject.two_factor_temp_secret;
@@ -127,18 +131,18 @@ class TwoFactorController {
         //send an sms to the user
         let message = "You have successfully activated Two-factor authentication on your account. ";
         if(updatedUserObject.phone_verification !== null){
-            SendGenericSms(settingsDetails, message, userObject);
+            SendGenericSms(settingsDetails, message, selectedUserObject);
         }
 
       //send an email message to the user
         let emailSubject = "Successful Activation of Two-Factor Authentication";
-        let fullName = this.User.returnFullName(userObject);
+        let fullName = this.User.returnFullName(selectedUserObject);
         message = message+"Please note that you will always have to provide the generated token from your authentication application for validation of sensitive activities you want to perform on your account.";
-        await sendGenericMails(userObject, fullName, settingsDetails, emailSubject, message);
+        await sendGenericMails(selectedUserObject, fullName, settingsDetails, emailSubject, message);
 
       //send a meesage success message to the view
       this.responseObject.setMesageType("normal");
-      let userObjectForView = this.User.returnUserForView(updatedUserObject);
+      let userObjectForView = await this.User.returnUserForView(updatedUserObject);
       this.responseObject.setData({ user: userObjectForView });
       this.responseObject.setStatus(true);
       this.responseObject.setMessage(
@@ -176,7 +180,7 @@ class TwoFactorController {
 
       userObject = await this.User.selectOneUser([["email", "=", userObject.email]]);
       if (userObject === false) {
-        let errorMessage = this.ErrorMessages.ErrorMessageObjects.invalid_user;
+        let errorMessage = this.ErrorMessages.ErrorMessageObjects.authentication_failed;
         throw new Error(errorMessage);
       }
 
@@ -252,7 +256,6 @@ class TwoFactorController {
       if(userObject === false){
         throw new Error('Email Address Does not exist');
       }
-
       if(userObject.auth_type !== 'google_auth'){//make sure user enabled the two factor auth
         throw new Error('Two-Factor Authentication is not enabled on your account');
       }
@@ -527,7 +530,7 @@ class TwoFactorController {
       //select the user
       userObject = await this.User.selectOneUser([["email", "=", userObject.email]]);
       if (userObject === false) {
-        let errorMessage = this.ErrorMessages.ErrorMessageObjects.invalid_user;
+        let errorMessage = this.ErrorMessages.ErrorMessageObjects.authentication_failed;
         throw new Error(errorMessage);
       }
 

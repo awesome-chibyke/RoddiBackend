@@ -2,7 +2,10 @@ const DbActions = require("../model/DbActions");
 const Settings = require("./Settings");
 const speakeasy = require("speakeasy");
 const AccountVerificationLevels = require("../helpers/AccountVerificationLevels");
+const {GetRequest, PostRequest} = require("../helpers/ExternalRequest");
+
 var QRCode = require("qrcode");
+var fs = require("fs");
 const ErrorHandler = require("../helpers/ErrorHandler");
 class User {
   constructor() {
@@ -10,6 +13,15 @@ class User {
     this.Settings = new Settings();
     this.AccountVerificationLevels = new AccountVerificationLevels();
     this.AccountActionDelayTimeForAdminAction = 48;
+  }
+
+  async returnIpDetails(req){
+    //let ipInfo = await GetRequest('https://api.ipify.org?format=json');
+    let ipInfo = req.ipInfo;
+    let ip_address = ipInfo.ip;
+    if(ip_address.includes(',')){ ip_address = ip_address.split(',')[0]}
+    let IpInformation = await GetRequest(`http://ip-api.com/json/${ip_address}?fields=66322431`);
+    return IpInformation;
   }
 
 
@@ -119,15 +131,10 @@ class User {
     try {
       //get the token from the request body
       let tokenSupplied = req.body.token;
+
       //select the temporal key that was saved for  the two factor
       //select the user involved
-      let selectedUserObject = await this.selectOneUser([
-        ["unique_id", "=", userObject.unique_id],
-      ]);
-      if (selectedUserObject === false) {
-        throw new Error("Invalid User details supplied");
-      }
-      let base32secret = selectedUserObject.two_factor_secret;
+      let base32secret = userObject.two_factor_secret;
 
       //check the token supplied to make sure its validate
       var verified = speakeasy.totp.verify({
@@ -157,9 +164,26 @@ class User {
 
   async fetchUserCurrency(CurrencyId){
 
-    return await this.DbActions.selectSingleRow("currency_rates_models", {
+    /*return await this.DbActions.selectSingleRow("currency_rates_models", {
       filteringConditions: [["unique_id", "=", CurrencyId]],
-    });
+    });*/
+    let thePath = './files/currency/currency_details.json';
+
+    let existingCurrencyArray = fs.readFileSync(thePath);
+    existingCurrencyArray = JSON.parse(existingCurrencyArray);
+
+    let selected = null;//initialize selected currency
+
+    if(existingCurrencyArray.length > 0){
+      for(let i in existingCurrencyArray){
+        if(existingCurrencyArray[i].unique_id === CurrencyId){
+          selected = existingCurrencyArray[i];
+          break;
+        }
+      }
+    }
+
+    return selected;
   }
 
 

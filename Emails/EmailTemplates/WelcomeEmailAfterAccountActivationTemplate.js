@@ -229,7 +229,7 @@ const WelcomeMailAfterAccountActivationTemplate = (
                                 width: 100%;
                                 background-color:#ddd;
                                 padding-top: 10px;
-                                padding-bottom: 10px; border-bottom: 2px solid #1B1717; background: url('background-landscape.png'); background-position: center; background-size: cover;"
+                                padding-bottom: 10px; border-bottom: 2px solid #1B1717; background: url(${$settingsObj.site_url+'/email_files/background-landscape.png'}); background-position: center; background-size: cover;"
                                             >
     <!--           background-landscape.png                                 //ios_url,android_url-->
                                                 <h2 style="text-align: left; text-transform: uppercase; font-family: '.$this->overPass.'; margin-bottom: 5px; padding-left: 10px; ">
@@ -351,10 +351,10 @@ const WelcomeMailAfterAccountActivationTemplate = (
                                             <div style="width:100%; margin-bottom: 10px;">
                                                 <p>Download our mobile apps, follow the link below</p>
                                                 <div style="width: 40%; display: inline-block;">
-                                                    <img src="android.png" style="width:100%;" />
+                                                    <a href="${$settingsObj.ios_url}" ><img src="${$settingsObj.site_url}/email_files/android.png" style="width:100%;" /></a>
                                                 </div>
                                                 <div style="width: 40%; display: inline-block;">
-                                                    <img src="ios.png" style="width:100%;" />
+                                                    <a href="${$settingsObj.android_url}" ><img src="${$settingsObj.site_url}/email_files/ios.png" style="width:100%;" /></a>
                                                 </div>
                                             </div>
     

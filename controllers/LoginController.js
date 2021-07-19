@@ -1,4 +1,5 @@
 const DbActions = require("../model/DbActions");
+const LoginAuthModel = require("../model/LoginAuthModel");
 const PasswordHasher = require("../helpers/PasswordHasher");
 const SendWelcomeEmail = require("../Emails/SendWelcomeEmail");
 var AuthenticationCode = require("../helpers/AuthenticationCode");
@@ -6,10 +7,17 @@ var SendLoginAuthMail = require("../Emails/SendLoginAuthMail");
 var SendLoginAuthSms = require("../SmsManager/SendLoginAuthSms");
 const jwt = require("jsonwebtoken");
 const ErrorHandler = require("../helpers/ErrorHandler");
+const Generics = require("../helpers/Generics");
 const User = require("../model/User");
+const Settings = require("../model/Settings");
 const responseObject = require("../controllers/ViewController");
 const MessageType = require("../helpers/MessageType");
-const twilio = require("twilio");
+const date = require("date-and-time");
+const validator = require("../helpers/validator");
+const {GetRequest, PostRequest} = require("../helpers/ExternalRequest");
+const {SendGenericSms} = require("../helpers/SendGenericSms");
+const {sendGenericMails} = require("../Emails/GenericMailSender");
+
 class LoginController {
   constructor() {
     this.responseObject = new responseObject();
@@ -19,15 +27,19 @@ class LoginController {
     this.AuthenticationCode = new AuthenticationCode();
     this.SendLoginAuthMail = new SendLoginAuthMail();
     this.SendLoginAuthSms = new SendLoginAuthSms();
+    this.LoginAuthModel = new LoginAuthModel();
     this.User = new User();
     this.MessageType = new MessageType();
+    this.Settings = new Settings();
+    this.Generics = new Generics();
   }
 
   async loginAction(req, res) {
+
     let email = req.body.email;
     let password = req.body.password;
-    //check for the existence of the vaklues
 
+    //check for the existence of the values
     let messageType = '';
 
     try {
@@ -134,11 +146,41 @@ class LoginController {
     }
   }
 
+  valdateFunction(req, ValidationRule){
+
+    validator(req.body, ValidationRule, {}, (err, status) => {
+      if (status === false) {
+        this.errorMessage = err;
+      }
+      this.errorStatus = status;
+    })
+  }
+
   //activate the user account
   async AuthenticateLoginCode(req, res) {
     try {
+
       //authenticate if the user is logged in
       const email = req.body.email;
+        let IpInformation = await this.User.returnIpDetails(req);
+        let ip_address = IpInformation.query;
+        let location = `${IpInformation.city} ${IpInformation.regionName}, ${IpInformation.country}`;
+      let device_name = req.body.device_name;
+      let the_token = req.body.token;
+
+    //validation
+      let validationRule = {
+        token: "required|numeric",
+        email:"required|email",
+        device_name:"required|string"
+      };
+
+      this.valdateFunction(req, validationRule);
+      if(this.errorStatus === false){
+        this.responseObject.setStatus(false);
+        this.responseObject.setMessage(this.errorMessage.errors);
+        return res.json(this.responseObject.sendToView());
+      }
 
       //select the user involved
       let userObject = await this.User.selectOneUser([["email", "=", email]]);
@@ -149,26 +191,25 @@ class LoginController {
       //verify the token provided
       let tokenAuthentication =
       await this.AuthenticationCode.verifyTokenValidity(
-        req.body.token,
+          the_token,
         this.AuthenticationCode.login_auth_type,
         userObject
       );
-
       if (tokenAuthentication.status === false) {
         throw new Error(tokenAuthentication.message);
       }
 
-      //create the jwt token and send to the view
-      jwt.sign({ user: userObject }, "secretkey", async (err, token) => {
-        this.responseObject.setMesageType("normal");
-        //delete the properties that is not supposed t be sent to view
-        let userObjectForView = await this.User.returnUserForView(userObject);
-        this.responseObject.setData({ token: token, user: userObjectForView });
-        this.responseObject.setStatus(true);
-        this.responseObject.setMessage("you have been successfully logged in");
-        res.status(200).json(this.responseObject.sendToView());
-      });
-      //
+      //create the jwt token
+      let createdToken = await this.secondLayerAuth(userObject);
+      await this.generateToken(userObject, ip_address, device_name, createdToken, location);
+
+      this.responseObject.setMesageType("normal");
+      //delete the properties that is not supposed t be sent to view
+      let userObjectForView = await this.User.returnUserForView(userObject);
+      this.responseObject.setData({ token: createdToken, user: userObjectForView });
+      this.responseObject.setStatus(true);
+      this.responseObject.setMessage("you have been successfully logged in");
+      res.status(200).json(this.responseObject.sendToView());
     } catch (e) {
       this.responseObject.setStatus(false);
       this.responseObject.setMessage({ general_error: [ErrorHandler(e)] });
@@ -179,7 +220,26 @@ class LoginController {
   //for the users that make use of auth
   async authenticateLoginWithTwoFactor(req, res) {
     try {
-      let email = req.body.email;
+      const email = req.body.email;
+      let IpInformation = await this.User.returnIpDetails(req);
+      let ip_address = IpInformation.query;
+      let location = `${IpInformation.city} ${IpInformation.regionName}, ${IpInformation.country}`;
+      let device_name = req.body.device_name;
+
+      //validation
+      let validationRule = {
+        token: "required|numeric",
+        email:"required|email",
+        //ip_address:"required|string",
+        device_name:"required|string"
+      };
+
+      this.valdateFunction(req, validationRule);
+      if(this.errorStatus === false){
+        this.responseObject.setStatus(false);
+        this.responseObject.setMessage(this.errorMessage.errors);
+        return res.json(this.responseObject.sendToView());
+      }
 
       let userObject = await this.User.selectOneUser([["email", "=", email]]);
       if (userObject === false) {
@@ -191,17 +251,19 @@ class LoginController {
         throw new Error(verifyUser.message);
       }
 
-      //use jwt to create a token_type//create the jwt token and send to the view
-      jwt.sign({ user: userObject }, "secretkey", async (err, token) => {
-        this.responseObject.setMesageType("normal");
-        let userObjectForView = await this.User.returnUserForView(userObject);
-        this.responseObject.setData({ token: token, user: userObjectForView });
-        this.responseObject.setStatus(true);
-        this.responseObject.setMessage("you have been successfully logged in");
-        res.status(200).json(this.responseObject.sendToView());
-      });
+      //create the jwt token
+      let createdToken = await this.secondLayerAuth(userObject);
+      await this.generateToken(userObject, ip_address, device_name, createdToken, location);
+
+      this.responseObject.setMesageType("normal");
+      //delete the properties that is not supposed t be sent to view
+      let userObjectForView = await this.User.returnUserForView(userObject);
+      this.responseObject.setData({ token: createdToken, user: userObjectForView });
+      this.responseObject.setStatus(true);
+      this.responseObject.setMessage("you have been successfully logged in");
+      res.status(200).json(this.responseObject.sendToView());
     } catch (e) {
-      //send tthe error to the views
+      //send the error to the views
       this.responseObject.setStatus(false);
       this.responseObject.setMessage({ general_error: [ErrorHandler(e)] });
       res.json(this.responseObject.sendToView());
@@ -259,6 +321,81 @@ class LoginController {
       res.json(this.responseObject.sendToView());
     }
   }
+
+  secondLayerAuth(userObject){
+
+    return new Promise(function (resolve, reject) {
+
+      //create the jwt token and send to the view
+      jwt.sign({ user: userObject }, "secretkey", async (err, token) => {
+        if(err){
+          reject(err)
+        }else{
+          //
+          resolve(token)
+
+        }
+      });
+
+    })
+  }
+
+  async generateToken(userObject, ip_address, device_name, Token, location){
+
+    const now = new Date();
+    let currentDate = date.format(now, "YYYY-MM-DD HH:mm:ss");
+    let expirationTimeFromCreatedTime = date.addDays(now, 2);
+    expirationTimeFromCreatedTime = date.format(expirationTimeFromCreatedTime, "YYYY-MM-DD HH:mm:ss");
+
+    //check if the incoming device has been stored before
+    let loginAuthDetails = await this.LoginAuthModel.selectAllLoginAuthWhere([['device_name', '=', device_name]]);
+    if(loginAuthDetails.length == 0){//that means that the user has not logged in with the device before
+
+      let settingsDetails = await this.Settings.selectSettings();
+
+      //send an email to the user that his/her account has been logged into from an unknown position
+      let emailSubject = "Account login Activity from an unknown device";
+      let message = `A login activity just occurred on your account with ${settingsDetails.site_name}. Details are listed below: <br> <strong>Email</strong>: userObject.email. <br> <strong>Device Name</strong>: ${device_name}. <br> <strong>Login Time</strong>: ${currentDate}. <br> <strong>IP Address</strong>: ${ip_address}. <br><strong>Location</strong>: ${location}. <br> Please click the link if you did not authorize this action. ${settingsDetails.site_url}/disable_account/`;
+      let fullName = this.User.returnFullName(userObject);
+
+      await sendGenericMails(userObject, fullName, settingsDetails, emailSubject, message);
+
+    }else{//a situation where the user have not logged in using that device
+
+      //loop through the devices and check the already existing device as off
+      for(let u in loginAuthDetails){
+        if(loginAuthDetails[u].logged_out === 'none'){
+          await this.LoginAuthModel.updateLoginAuth({
+            unique_id:loginAuthDetails[u].unique_id,
+            logged_out:'yes'
+          })
+        }
+      }
+
+    }
+
+    let uniqueIdDetails = await this.Generics.createUniqueId("login_table","unique_id");
+    if (uniqueIdDetails.status === false){ throw new Error(uniqueIdDetails.message); }
+
+    let hashedToken = await this.PasswordHasher.hashPassword(Token);
+
+    //add the login details to login auth db
+    await this.DbActions.insertData('login_table', {
+      unique_id: uniqueIdDetails.data,
+      user_unique_id: userObject.unique_id,
+      logged_out:'none',
+      ip_address: ip_address,
+      token_secret:hashedToken,
+      due_date:expirationTimeFromCreatedTime,
+      device_name:device_name,
+      location:location,
+      created_at: currentDate,
+      updated_at: currentDate,
+    });
+  }
+
 }
 
 module.exports = LoginController;
+
+

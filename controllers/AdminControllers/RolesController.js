@@ -33,6 +33,14 @@ class RolesController {
             }
             this.errorStatus = status;
         });
+
+        let theObject = {
+            roles:[
+                {unique_id:'',role:'',description:'',deleted_at:null,created_at:'',updated_at:''},
+            ],
+            type_of_users:[],
+            privileges:[],
+        }
     }
 
     //add new role to the database
