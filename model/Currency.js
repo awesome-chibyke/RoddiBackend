@@ -20,9 +20,9 @@ class Currency {
       filteringConditions: conditions,
     }); currency*/
 
-    let thePath = this.CurrencyFilePath;
+    let thePath = this.CurrencyFilePath;//currency json file path
 
-    let existingCurrencyArray = fs.readFileSync(thePath);
+    let existingCurrencyArray = fs.readFileSync(thePath);//reading the file
     existingCurrencyArray = JSON.parse(existingCurrencyArray);
 
     return existingCurrencyArray;

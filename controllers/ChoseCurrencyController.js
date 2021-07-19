@@ -104,7 +104,7 @@ class CurrencyController {
       const allCurrency = isoCountryCurrency.getAllISOCodes();
 
       let existingCurrencyArray = fs.readFileSync(thePath);
-      existingCurrencyArray = JSON.parse(existingCurrencyArray);
+      existingCurrencyArray = JSON.parse(existingCurrencyArray);//convert to object
       let currencyArray = [];
 
       if(allCurrency.length > 0){
