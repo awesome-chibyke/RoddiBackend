@@ -8,6 +8,7 @@ const SendWelcomeEmail = require("../Emails/SendWelcomeEmail");
 const ErrorHandler = require("../helpers/ErrorHandler");
 const MessageType = require("../helpers/MessageType");
 const User = require("../model/User");
+const Currency = require("../model/Currency");
 
 //instantiation
 class RegisterController {
@@ -20,6 +21,7 @@ class RegisterController {
     this.passwordController = new PasswordHasher();
     this.MessageType = new MessageType();
     this.User = new User();
+    this.Currency = new Currency();
   }
 
   async register(req, res) {
@@ -27,6 +29,19 @@ class RegisterController {
       let email = req.body.email;
       let password = req.body.password;
       let referral_id = req.body.referral_id;
+      let IpInformation = await this.User.returnIpDetails(req);
+      let ip_address = IpInformation.query;
+      let location = `${IpInformation.city} ${IpInformation.regionName}, ${IpInformation.country}`;
+      let country_code = IpInformation.countryCode;
+
+      //get the currency to be assigned to the user
+      let addCurrency = 0, currencyId = null;
+      let currencyObject = await this.Currency.fetchCurrencyBasedOnCountryCode(country_code);
+      if(currencyObject !== null){
+        addCurrency = 1;
+        currencyId = currencyObject.unique_id;
+      }
+
       let uniqueIdDetails = await this.Generics.createUniqueId(
         "users",
         "unique_id"
@@ -49,6 +64,9 @@ class RegisterController {
         created_at: currenctDate,
         updated_at: currenctDate,
       };
+      if(addCurrency == 1){
+        userObject.preferred_currency = currencyId;
+      }
 
       //insert the values into the db
       var insertValue = await this.DbActions.insertData("users", [userObject]);

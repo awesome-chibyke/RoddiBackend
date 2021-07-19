@@ -34,6 +34,8 @@ class EditController {
   }
 
   async edit(req, res) {
+    //authenticate user
+    let userObject = await authData(req);
     try {
       //validation
       let validationRule = {
@@ -55,8 +57,7 @@ class EditController {
         return res.json(this.responseObject.sendToView());
       }
 
-      //authenticate user
-      let userObject = await authData(req);
+
       userObject = await this.User.selectOneUser([
           ['unique_id', '=', userObject.user.unique_id]
       ]);

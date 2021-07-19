@@ -56,7 +56,6 @@ class IdentityUploadController {
             let filename = req.file.filename;
 
             let oldPathForDisplay = req.file.destination+'/'+filename;
-            //let newPathForDisplay = './files/faceUploads/'+filename;
 
             let userObject = await authData(req);
             userObject = await this.User.selectOneUser([["unique_id", "=", userObject.user.unique_id]]);

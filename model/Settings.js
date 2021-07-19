@@ -17,7 +17,7 @@ class Settings {
     return settings;
   }
 
-  async selectSettings(conditions) {
+  async selectSettings(conditions = []) {
     //conditions = [["email", "=", email]];
     /*let settingsObject = await this.DbActions.selectSingleRow("settings", {
       filteringConditions: conditions,
