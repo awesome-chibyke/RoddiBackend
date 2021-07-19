@@ -1,4 +1,5 @@
 const DbActions = require("../model/DbActions");
+const fs = require("fs");
 class Currency {
   constructor() {
     this.DbActions = new DbActions();
@@ -10,17 +11,41 @@ class Currency {
     this.countryAbbrArray = [
       "BI","CA","DR","CV","EU","GB","GH","GM","GN","KE","LRD","MWK","MZN","NG","RW","SL","ST","TZ","UG","US","XA","XO","ZM","ZM","ZW","ZA",
     ];
+    this.CurrencyFilePath = './files/currency/currency_details.json';
   }
 
   async getAllCurrency(conditions) {
     //[["unique_id", "=", Currency]]
-    let currency = await this.DbActions.selectAllData("currency_rates_models", {
+    /*let currency = await this.DbActions.selectAllData("currency_rates_models", {
       filteringConditions: conditions,
-    });
-    if (currency === "undefined") {
-      return false;
+    }); currency*/
+
+    let thePath = this.CurrencyFilePath;//currency json file path
+
+    let existingCurrencyArray = fs.readFileSync(thePath);//reading the file
+    existingCurrencyArray = JSON.parse(existingCurrencyArray);
+
+    return existingCurrencyArray;
+  }
+
+
+  //fetch currency based on the user ip address
+  async fetchCurrencyBasedOnCountryCode(country_code){
+    const filePath = this.CurrencyFilePath;
+    let existingCurrencyArray = fs.readFileSync(filePath);
+    existingCurrencyArray = JSON.parse(existingCurrencyArray);
+    let selected = null
+
+    if(existingCurrencyArray.length > 0){
+      for(let i in existingCurrencyArray){
+        if(existingCurrencyArray[i].country_abbr === country_code){
+          selected = existingCurrencyArray[i];
+          break;
+        }
+      }
     }
-    return currency;
+
+    return selected;
 
   }
 
@@ -52,6 +77,7 @@ class Currency {
 
     return newCurrencyArray;
   }
+
 }
 
 module.exports = Currency;

@@ -63,7 +63,7 @@ router.get("/initialize_disable_of_two_factor_deactivation_request", verifyToken
 
 
 //remove the 2-factor deactivation request on a users account, this route is authenticated
-router.post("/initialize_disable_of_two_factor_deactivation_request", verifyToken, async (req, res) => {
+router.post("/supply_token_from_auth_app_for_two_factor_disable", verifyToken, async (req, res) => {
     await TwoFactorController.cancelTwoFactorDisableRequest(req, res);
 });
 

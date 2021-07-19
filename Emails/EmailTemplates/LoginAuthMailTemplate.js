@@ -238,10 +238,10 @@ const LoginAuthTemplate = (
                                                 </h2>
                                                 <h2 style="text-align: left; text-transform: uppercase; padding-left: 10px; font-family: '.$this->cursive.'; margin-top: 5px;">
                                                      ${$settingsObj.slogan === null ? '' : $settingsObj.slogan }</h2>
-                                                <h4
+                                                <!--<h4
                                                         style="text-align: center; text-transform: uppercase;">
                                                     Deposit Notification
-                                                </h4>
+                                                </h4>-->
     
                                                 <h3 align="center">${subject}</h3>
                                                 <div align="center">
