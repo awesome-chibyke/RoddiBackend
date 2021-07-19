@@ -110,19 +110,22 @@ class RolesController {
         throw new Error(uniqueIdDetails.message);
       }
 
+      const now = new Date(); //get the current date
+      let currenctDate = date.format(now, "YYYY-MM-DD HH:mm:ss");
+
       //add role to the array and save
       allRoles.push({
         unique_id: uniqueIdDetails.data,
         role: role,
         description: description,
         deleted_at: null,
-        created_at: this.currenctDate,
-        updated_at: this.currenctDate,
+        created_at: currenctDate,
+        updated_at: currenctDate,
       });
 
       RolesManagementObject.roles = allRoles;
       let data = JSON.stringify(RolesManagementObject, null, 2);
-      fs.writeFileSync(this.RolesManagementFilePath, data);
+      fs.writeFileSync(this.RoleManagerFilePath, data);
 
       //send details to view
       this.responseObject.setStatus(true);
@@ -137,9 +140,8 @@ class RolesController {
         general_error: [ErrorHandler(err)],
       });
       res.json(this.responseObject.sendToView());
-      console.log(err)
+      console.log(err);
     }
-    
   }
 
   //select all the available roles

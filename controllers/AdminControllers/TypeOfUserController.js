@@ -13,133 +13,141 @@ const ErrorMessages = require("../../helpers/ErrorMessages");
 const fs = require("fs");
 
 class TypeOfUserController {
-    constructor(){
-        this.errorMessage = '';
-        this.errorStatus = false;
-        this.responseObject = new responseObject();
-        this.DbActions = new DbActions();
-        this.AuthenticationCode = new AuthenticationCode();
-        this.Generics = new Generics();
-        this.MessageType = new MessageType();
-        this.User = new User();
-        this.TypeOfUsers = new TypeOfUsers();
-        this.ErrorMessages = new ErrorMessages();
-        this.TypeOfUserFilePath = this.TypeOfUsers.TypeOfUserFilePath;
-    }
+  constructor() {
+    this.errorMessage = "";
+    this.errorStatus = false;
+    this.responseObject = new responseObject();
+    this.DbActions = new DbActions();
+    this.AuthenticationCode = new AuthenticationCode();
+    this.Generics = new Generics();
+    this.MessageType = new MessageType();
+    this.User = new User();
+    this.TypeOfUsers = new TypeOfUsers();
+    this.ErrorMessages = new ErrorMessages();
+    this.RoleManagerFilePath = this.TypeOfUsers.RoleManagerFilePath;
+  }
 
-    valdateFunction(req, ValidationRule) {
-        validator(req.body, ValidationRule, {}, (err, status) => {
-            if (status === false) {
-                this.errorMessage = err;
-            }
-            this.errorStatus = status;
-        });
-    }
+  valdateFunction(req, ValidationRule) {
+    validator(req.body, ValidationRule, {}, (err, status) => {
+      if (status === false) {
+        this.errorMessage = err;
+      }
+      this.errorStatus = status;
+    });
+  }
 
-    async storeTypeOfUsers(req, res){
+  async storeTypeOfUsers(req, res) {
+    try {
+      let loggedUser = await authData(req);
+      loggedUser = await this.User.selectOneUser([
+        ["unique_id", "=", loggedUser.user.unique_id],
+      ]);
+      if (loggedUser === false) {
+        this.responseObject.setData([]);
+        let ErrorMessage =
+          this.ErrorMessages.ErrorMessageObjects.authentication_failed;
+        throw new Error(ErrorMessage);
+      }
 
-        try{
+      //validate the user
+      const TypeOfUserVerificationRule = {
+        //validate the datas for the verification
+        type_of_user: "required|string",
+        description: "required|string|max:100",
+      };
+      this.valdateFunction(req, TypeOfUserVerificationRule); //call the validation function
+      if (this.errorStatus === false) {
+        this.responseObject.setStatus(false);
+        this.responseObject.setMessage(this.errorMessage.errors);
+        return res.json(this.responseObject.sendToView());
+      }
 
-            let loggedUser = await authData(req);
-            loggedUser = await this.User.selectOneUser([["unique_id", "=", loggedUser.user.unique_id]]);
-            if(loggedUser === false){
-                this.responseObject.setData([]);
-                let ErrorMessage = this.ErrorMessages.ErrorMessageObjects.authentication_failed;
-                throw new Error(ErrorMessage);
-            }
+      let type_of_user = req.body.type_of_user;
+      let description = req.body.description;
 
-            //validate the user
-            const TypeOfUserVerificationRule = {//validate the datas for the verification
-                type_of_user: "required|string",
-                description: "required|string|max:100"
-            };
-            this.valdateFunction(req, TypeOfUserVerificationRule);//call the validation function
-            if(this.errorStatus === false){
-                this.responseObject.setStatus(false);
-                this.responseObject.setMessage(this.errorMessage.errors);
-                return res.json(this.responseObject.sendToView());
-            }
+      //select all roles from the json json file
+      let RolesManagementObject = await this.TypeOfUsers.selectOneTypeOfUser();
+      let typeOfUserObject = RolesManagementObject.type_of_users;
 
-            let type_of_user = req.body.type_of_user;
-            let description = req.body.description;
+      let checkExistence = 0;
 
-            let checkForExistence = await this.TypeOfUsers.selectOneTypeOfUser([['type_of_user', '=', type_of_user]]);
-            if(checkForExistence !== false){
-                let ErrorMessage = this.ErrorMessages.ErrorMessageObjects.type_of_user_exist;
-                throw new Error(ErrorMessage);
-            }
-
-
-            let uniqueIdDetails = await this.Generics.createUniqueId("type_of_user_tb","unique_id");
-            if (uniqueIdDetails.status === false) {
-                throw new Error(uniqueIdDetails.message);
-            }
-
-            //insert the values to the db
-            const now = new Date();
-            let currenctDate = date.format(now, "YYYY-MM-DD HH:mm:ss");
-
-            let typeOfUserObject = {
-                unique_id: uniqueIdDetails.data,
-                type_of_user: type_of_user,
-                description: description,
-                created_at: currenctDate,
-                updated_at: currenctDate,
-            };
-
-            //insert the values into the db
-            var createTypeOfUser = await this.DbActions.insertData("type_of_user_tb", [typeOfUserObject]);
-
-            //select the all the roles
-            let TypeOfUsers = await this.TypeOfUsers.selectAllTypeOfUsers();
-
-            //send details to view
-            this.responseObject.setStatus(true);
-            this.responseObject.setMessage("Type of User was successfully added");
-            this.responseObject.setData({
-                type_of_users: TypeOfUsers
-            });
-            res.json(this.responseObject.sendToView());
-
-        }catch(err){
-            this.responseObject.setStatus(false);
-            this.responseObject.setMessage({
-                general_error: [ErrorHandler(err)],
-            });
-            res.json(this.responseObject.sendToView());
+      if (typeOfUserObject.length > 0) {
+        for (let i in typeOfUserObject) {
+          if (typeOfUserObject[i].type_of_user === type_of_user) {
+            checkExistence = 1;
+          }
         }
+      }
 
+      if (checkExistence == 1) {
+        let ErrorMessage =
+          this.ErrorMessages.ErrorMessageObjects.type_of_user_exist;
+        throw new Error(ErrorMessage);
+      }
+
+      let uniqueIdDetails = await this.Generics.createUniqueId(
+        "type_of_user_tb",
+        "unique_id"
+      );
+      if (uniqueIdDetails.status === false) {
+        throw new Error(uniqueIdDetails.message);
+      }
+
+      //insert the values to the db
+      const now = new Date();
+      let currenctDate = date.format(now, "YYYY-MM-DD HH:mm:ss");
+
+      typeOfUserObject.push({
+        unique_id: uniqueIdDetails.data,
+        type_of_user: type_of_user,
+        description: description,
+        created_at: currenctDate,
+        updated_at: currenctDate,
+      });
+
+      RolesManagementObject.type_of_users = typeOfUserObject;
+      let data = JSON.stringify(RolesManagementObject, null, 2);
+      fs.writeFileSync(this.RoleManagerFilePath, data);
+
+      //send details to view
+      this.responseObject.setStatus(true);
+      this.responseObject.setMessage("Type of User was successfully added");
+      this.responseObject.setData({
+        type_of_users: typeOfUserObject,
+      });
+      res.json(this.responseObject.sendToView());
+    } catch (err) {
+      this.responseObject.setStatus(false);
+      this.responseObject.setMessage({
+        general_error: [ErrorHandler(err)],
+      });
+      res.json(this.responseObject.sendToView());
+      console.log(err);
     }
+  }
 
-    async selectAllTypeOfUsers(req, res){
+  async selectAllTypeOfUsers(req, res) {
+    try {
+      let thePath = this.RoleManagerFilePath;
+      //select the all the roles
+      let existingTypeOfUserArray = fs.readFileSync(thePath);
+      existingTypeOfUserArray = JSON.parse(existingTypeOfUserArray);
 
-        try{
-            let thePath = this.TypeOfUserFilePath;
-            //select the all the roles
-            let existingTypeOfUserArray = fs.readFileSync(thePath);
-            existingTypeOfUserArray = JSON.parse(existingTypeOfUserArray);
-
-            //send details to view
-            this.responseObject.setStatus(true);
-            this.responseObject.setMessage("Role was successfully added");
-            this.responseObject.setData({
-                type_of_users: existingTypeOfUserArray.type_of_users
-            });
-            res.json(this.responseObject.sendToView());
-
-        }catch(err){
-
-            this.responseObject.setStatus(false);
-            this.responseObject.setMessage({
-                general_error: [ErrorHandler(err)],
-            });
-            res.json(this.responseObject.sendToView());
-
-        }
-
+      //send details to view
+      this.responseObject.setStatus(true);
+      this.responseObject.setMessage("Role was successfully added");
+      this.responseObject.setData({
+        type_of_users: existingTypeOfUserArray.type_of_users,
+      });
+      res.json(this.responseObject.sendToView());
+    } catch (err) {
+      this.responseObject.setStatus(false);
+      this.responseObject.setMessage({
+        general_error: [ErrorHandler(err)],
+      });
+      res.json(this.responseObject.sendToView());
     }
-
-
+  }
 }
 
 module.exports = TypeOfUserController;
