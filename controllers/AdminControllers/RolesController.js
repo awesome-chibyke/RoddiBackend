@@ -10,6 +10,7 @@ const User = require("../../model/User");
 const RolesModel = require("../../model/RolesModel");
 const authData = require("../../helpers/AuthenticateLogin");
 const validator = require("../../helpers/validator");
+const fs = require("fs");
 
 
 class RolesController {
@@ -24,6 +25,9 @@ class RolesController {
         this.User = new User();
         this.RolesModel = new RolesModel();
         this.ErrorMessages = new ErrorMessages();
+        this.RolesManagementFilePath = this.RolesModel.RoleManagerFilePath;
+        const now = new Date();
+        this.currenctDate = date.format(now, "YYYY-MM-DD HH:mm:ss");
     }
 
     valdateFunction(req, ValidationRule) {
@@ -33,18 +37,90 @@ class RolesController {
             }
             this.errorStatus = status;
         });
+    }
 
-        let theObject = {
-            roles:[
-                {unique_id:'',role:'',description:'',deleted_at:null,created_at:'',updated_at:''},
-            ],
-            type_of_users:[],
-            privileges:[],
+    async storeRoles(req, res){
+        try{
+            let loggedUser = await authData(req);//authenticate user
+            loggedUser = await this.User.selectOneUser([["unique_id", "=", loggedUser.user.unique_id]]);
+            if(loggedUser === false){
+                let ErrorMessage = this.ErrorMessages.ErrorMessageObjects.authentication_failed;
+                throw new Error(ErrorMessage);
+            }
+
+            let role = req.body.role;
+            let description = req.body.description;
+            //validate the user
+            const RolesValidationRule = {//validate the datas for the verification
+                role: "required|string",
+                description: "required|string|max:100"
+            };
+            this.valdateFunction(req, RolesValidationRule);//call the validation function
+            if(this.errorStatus === false){
+                this.responseObject.setStatus(false);
+                this.responseObject.setMessage(this.errorMessage.errors);
+                return res.json(this.responseObject.sendToView());
+            }
+
+            //check for space
+            if(role.includes(' ')){
+                throw new Error('spaces are not allowed, please use `Underscore`')
+            }
+
+            //select all roles from the json json file
+            let RolesManagementObject = await this.RolesModel.selectAllRoles();
+            let allRoles = RolesManagementObject.roles;
+            let checkExistence = 0;
+
+            if(allRoles.length > 0){
+                for(let i in allRoles){
+                    if(allRoles[i].role === role){
+                        checkExistence = 1;
+                    }
+                }
+            }
+
+            if(checkExistence == 1){
+                let ErrorMessage = this.ErrorMessages.ErrorMessageObjects.role_exists
+                throw new Error(ErrorMessage);
+            }
+
+            let uniqueIdDetails = await this.Generics.createUniqueId("roles","unique_id");
+            if (uniqueIdDetails.status === false) { throw new Error(uniqueIdDetails.message);}
+
+            //add role to the array and save
+            allRoles.push({
+                unique_id: uniqueIdDetails.data,
+                role: role,
+                description: description,
+                deleted_at:null,
+                created_at: this.currenctDate,
+                updated_at: this.currenctDate,
+            });
+
+            RolesManagementObject.roles = allRoles;
+            let data = JSON.stringify(RolesManagementObject, null, 2);
+            fs.writeFileSync(this.RolesManagementFilePath, data);
+
+            //send details to view
+            this.responseObject.setStatus(true);
+            this.responseObject.setMessage("Role was successfully added");
+            this.responseObject.setData({
+                roles: allRoles
+            });
+            res.json(this.responseObject.sendToView());
+
+        }catch(err){
+            this.responseObject.setStatus(false);
+            this.responseObject.setMessage({
+                general_error: [ErrorHandler(err)],
+            });
+            res.json(this.responseObject.sendToView());
         }
     }
 
     //add new role to the database
-    async storeRoles(req, res){
+    /*async storeRoles(req, res){
 
         try{
 
@@ -115,7 +191,7 @@ class RolesController {
             res.json(this.responseObject.sendToView());
         }
 
-    }
+    }*/
 
     //select all the available roles
     async selectAllRoles(req, res){
