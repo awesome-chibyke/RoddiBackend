@@ -31,8 +31,11 @@ const verifyToken = async (req) => {
         }
 
         if (PassStatus === false) {
-          let message = ErrorMessages.ErrorMessageObjects.authentication_failed
-          reject(message);
+          let message = ErrorMessages.ErrorMessageObjects.authentication_failed;
+          reject({
+            message:message,
+            stack:''
+          });
         }
         resolve(authData);
       }
