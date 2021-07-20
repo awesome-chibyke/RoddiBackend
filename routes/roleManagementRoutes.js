@@ -46,7 +46,7 @@ router.post("/get_type_of_user", verifyToken, async (req, res) => {
 });
 
 //get all type of users
-router.get("/get_type_of_user", verifyToken, async (req, res) => {
+router.get("/get_type_of_users", verifyToken, async (req, res) => {
     TypeOfUserController.selectAllTypeOfUsers(req, res);
 });
 

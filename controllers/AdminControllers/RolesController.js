@@ -10,6 +10,7 @@ const User = require("../../model/User");
 const RolesModel = require("../../model/RolesModel");
 const authData = require("../../helpers/AuthenticateLogin");
 const validator = require("../../helpers/validator");
+const Privileges = require("../../model/Priviledges");
 const fs = require("fs");
 
 class RolesController {
@@ -25,6 +26,7 @@ class RolesController {
     this.RolesModel = new RolesModel();
     this.ErrorMessages = new ErrorMessages();
     this.RoleManagerFilePath = this.RolesModel.RoleManagerFilePath;
+    this.Privileges = new Privileges();
   }
 
   valdateFunction(req, ValidationRule) {
@@ -58,11 +60,16 @@ class RolesController {
       loggedUser = await this.User.selectOneUser([
         ["unique_id", "=", loggedUser.user.unique_id],
       ]);
+
       if (loggedUser === false) {
         let ErrorMessage =
           this.ErrorMessages.ErrorMessageObjects.authentication_failed;
         throw new Error(ErrorMessage);
       }
+
+        //check privilege
+        let privilege = await this.Privileges.checkUserPrivilege(loggedUser, 'manage_roles');
+      if(privilege === false){ throw new Error('Access Denied')}
 
       let role = req.body.role;
       let description = req.body.description;
@@ -140,7 +147,6 @@ class RolesController {
         general_error: [ErrorHandler(err)],
       });
       res.json(this.responseObject.sendToView());
-      console.log(err);
     }
   }
 
