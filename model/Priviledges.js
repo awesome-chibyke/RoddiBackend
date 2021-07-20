@@ -139,12 +139,6 @@ class Priviledges{
         return true;
     }
 
-    let existingPriviledgeArray = fs.readFileSync(thePath); //reading the file
-    existingPriviledgeArray = JSON.parse(existingPriviledgeArray);
-
-    return existingPriviledgeArray;
-  }
-
   async selectAllPrivileges(conditions) {
     let thePath = this.RoleManagerFilePath; //role json file path
 
@@ -162,27 +156,13 @@ class Priviledges{
     return RolesManagementObject;
   }
 
-  // async selectOnePrivilege(conditions, filterDeletedRows = "yes") {
-  //   //conditions = [["email", "=", email]];
-  //   let userObject = await this.DbActions.selectSingleRow(
-  //     "privileges_tb",
-  //     {
-  //       filteringConditions: conditions,
-  //     },
-  //     filterDeletedRows
-  //   );
-  //   if (typeof userObject === "undefined") {
-  //     return false;
-  //   }
-  //   return userObject;
-  // }
-
   async selectOnePrivilege(conditions) {
     const thePath = this.RoleManagerFilePath;
     let existingObject = fs.readFileSync(thePath);
     existingObject = JSON.parse(existingObject);
     return existingObject;
   }
+
 }
 
 module.exports = Priviledges;
