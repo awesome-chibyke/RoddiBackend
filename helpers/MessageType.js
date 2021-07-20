@@ -14,6 +14,8 @@ class MessageType{
             password_change_auth_option:'password_change_auth_option',//auth option for password change
             cancel_request_to_disble_two_factor:'cancel_request_to_disble_two_factor',//cancel request to disable two factor auth
             phone_number_exists:'phone_number_already_exists',//cancel request to disable two factor auth
+            validate_phone_for_two_factor_deactivation:'validate_phone_for_two_factor_deactivation',//cancel request to disable two factor auth
+            validate_email_for_two_factor_deactivation:'validate_email_for_two_factor_deactivation',//cancel request to disable two factor auth
         };
         return messageArray[key];
     }
