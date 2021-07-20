@@ -15,43 +15,46 @@ const validator = require("../../helpers/validator");
 const fs = require("fs");
 
 class PrivilegeController {
-    constructor(){
-        this.errorMessage = '';
-        this.errorStatus = false;
-        this.responseObject = new responseObject();
-        this.DbActions = new DbActions();
-        this.AuthenticationCode = new AuthenticationCode();
-        this.Generics = new Generics();
-        this.MessageType = new MessageType();
-        this.User = new User();
-        this.RolesModel = new RolesModel();
-        this.Priviledges = new Priviledges();
-        this.TypeOfUsers = new TypeOfUsers();
-        this.ErrorMessages = new ErrorMessages();
-    }
+  constructor() {
+    this.errorMessage = "";
+    this.errorStatus = false;
+    this.responseObject = new responseObject();
+    this.DbActions = new DbActions();
+    this.AuthenticationCode = new AuthenticationCode();
+    this.Generics = new Generics();
+    this.MessageType = new MessageType();
+    this.User = new User();
+    this.RolesModel = new RolesModel();
+    this.Priviledges = new Priviledges();
+    this.TypeOfUsers = new TypeOfUsers();
+    this.ErrorMessages = new ErrorMessages();
+    this.RoleManagerFilePath = this.Priviledges.RoleManagerFilePath;
+  }
 
-    valdateFunction(req, ValidationRule) {
-        validator(req.body, ValidationRule, {}, (err, status) => {
-            if (status === false) {
-                this.errorMessage = err;
-            }
-            this.errorStatus = status;
-        });
-    }
+  valdateFunction(req, ValidationRule) {
+    validator(req.body, ValidationRule, {}, (err, status) => {
+      if (status === false) {
+        this.errorMessage = err;
+      }
+      this.errorStatus = status;
+    });
+  }
 
-    //store the privileges
-    async storePrivilege(req, res){
+  //store the privileges
+  async storePrivilege(req, res) {
+    try {
+      let loggedUser = await authData(req); //verify the logged in user
+      loggedUser = await this.User.selectOneUser([
+        ["unique_id", "=", loggedUser.user.unique_id],
+      ]);
+      if (loggedUser === false) {
+        let ErrorMessage =
+          this.ErrorMessages.ErrorMessageObjects.authentication_failed;
+        throw new Error(ErrorMessage);
+      }
 
-        try{
-            let loggedUser = await authData(req); //verify the logged in user
-            loggedUser = await this.User.selectOneUser([["unique_id", "=", loggedUser.user.unique_id]]);
-            if(loggedUser === false){
-                let ErrorMessage = this.ErrorMessages.ErrorMessageObjects.authentication_failed;
-                throw new Error(ErrorMessage);
-            }
-
-            //validate the user type_of_user_unique_id 	role_unique_id
-            /*const PhoneNumberVerificationRule = {//validate the datas for the verification
+      //validate the user type_of_user_unique_id 	role_unique_id
+      /*const PhoneNumberVerificationRule = {//validate the datas for the verification
                 roles_management: "required|array|min",
                 'roles_management.*':'required|min:1',
             };
@@ -63,100 +66,118 @@ class PrivilegeController {
                 return res.json(this.responseObject.sendToView());
             }*/
 
-            let rolesManagement = req.body.roles_management;//the role management from the front end
+      let rolesManagement = req.body.roles_management; //the role management from the front end
 
-            rolesManagement = [
-                {
-                    "type_of_user_unique_id": "oqsi4mgom8q8g8is7xya",
-                    "type_of_user": "super-admin",
-                    "role_unique_id": "1c0j6h8qxfgk5itflakq",
-                    "role": "manage_roles",
-                    "status": "active"
-                },
-                {
-                    "type_of_user_unique_id": "itkcxmvw60xvkpxthogp",
-                    "type_of_user": "mid-admin",
-                    "role_unique_id": "1c0j6h8qxfgk5itflakq",
-                    "role": "manage_roles",
-                    "status": "inactive"
-                },
-                {
-                    "type_of_user_unique_id": "8n6x48qwblvfa2hx3ruf",
-                    "type_of_user": "admin",
-                    "role_unique_id": "1c0j6h8qxfgk5itflakq",
-                    "role": "manage_roles",
-                    "status": "inactive"
-                },
-                {
-                    "type_of_user_unique_id": "7ov8pldpct4z0l9hkgxb",
-                    "type_of_user": "user",
-                    "role_unique_id": "1c0j6h8qxfgk5itflakq",
-                    "role": "manage_roles",
-                    "status": "active"
-                }
-            ];
+    //   rolesManagement = [
+    //     {
+    //       type_of_user_unique_id: "oqsi4mgom8q8g8is7xya",
+    //       type_of_user: "super-admin",
+    //       role_unique_id: "1c0j6h8qxfgk5itflakq",
+    //       role: "manage_roles",
+    //       status: "active",
+    //     },
+    //     {
+    //       type_of_user_unique_id: "itkcxmvw60xvkpxthogp",
+    //       type_of_user: "mid-admin",
+    //       role_unique_id: "1c0j6h8qxfgk5itflakq",
+    //       role: "manage_roles",
+    //       status: "inactive",
+    //     },
+    //     {
+    //       type_of_user_unique_id: "8n6x48qwblvfa2hx3ruf",
+    //       type_of_user: "admin",
+    //       role_unique_id: "1c0j6h8qxfgk5itflakq",
+    //       role: "manage_roles",
+    //       status: "inactive",
+    //     },
+    //     {
+    //       type_of_user_unique_id: "7ov8pldpct4z0l9hkgxb",
+    //       type_of_user: "user",
+    //       role_unique_id: "1c0j6h8qxfgk5itflakq",
+    //       role: "manage_roles",
+    //       status: "active",
+    //     },
+    //   ];
 
-            //loop through the role management data and add to the db
-            for(let i in rolesManagement){
-                let objectForUpdate = {};
-                //select the details to check if the details exist
-                let selectedPrivilege = await this.Priviledges.selectOnePrivilege([
-                    ['type_of_user_unique_id', '=', rolesManagement[i].type_of_user_unique_id],
-                    ['role_unique_id', '=',	rolesManagement[i].role_unique_id]
-                ]);
-
-                if(selectedPrivilege !== false){
-                    objectForUpdate = {
-                        unique_id:selectedPrivilege.unique_id,
-                        status:rolesManagement[i].status
-                    };
-                    await this.Priviledges.updatePrivilege(objectForUpdate);//update the privilege row
-                }else{
-
-                    let uniqueIdDetails = await this.Generics.createUniqueId("roles","unique_id");//create the unique id
-                    if (uniqueIdDetails.status === false) {
-                        throw new Error(uniqueIdDetails.message);
-                    }
-
-                    const now = new Date();//get the current date
-                    let currenctDate = date.format(now, "YYYY-MM-DD HH:mm:ss");
-
-                    let objectForCreationOfNewPrivilege = {
-                        unique_id: uniqueIdDetails.data,
-                        type_of_user_unique_id: rolesManagement[i].type_of_user_unique_id,
-                        role_unique_id: rolesManagement[i].role_unique_id,
-                        created_at: currenctDate,
-                        updated_at: currenctDate,
-                        status:rolesManagement[i].status
-                    };
-
-                    //insert the values into the db
-                    await this.DbActions.insertData("privileges_tb", [objectForCreationOfNewPrivilege]);
-
-                }
-
-            }
+      //loop through the role management data and add to the db
+      for (let i in rolesManagement) {
+        let objectForUpdate = {};
+        //select the details to check if the details exist
+        let selectedPrivilege = await this.Priviledges.selectOnePrivilege([
+          [
+            "type_of_user_unique_id",
+            "=",
+            rolesManagement[i].type_of_user_unique_id,
+          ],
+          ["role_unique_id", "=", rolesManagement[i].role_unique_id],
+        ]);
 
 
+        if (selectedPrivilege !== false) {
+          objectForUpdate = {
+            unique_id: selectedPrivilege.unique_id,
+            status: rolesManagement[i].status,
+          };
+          await this.Priviledges.updatePrivilege(objectForUpdate); //update the privilege row
+        } else {
+          let uniqueIdDetails = await this.Generics.createUniqueId(
+            "roles",
+            "unique_id"
+          ); //create the unique id
+          if (uniqueIdDetails.status === false) {
+            throw new Error(uniqueIdDetails.message);
+          }
 
-            //select the all the roles
-            let AllPrivileges = await this.selectAllPrivilege();
+          const now = new Date(); //get the current date
+          let currenctDate = date.format(now, "YYYY-MM-DD HH:mm:ss");
 
-            //send details to view
-            this.responseObject.setStatus(true);
-            this.responseObject.setMessage("Updates were successful");
-            this.responseObject.setData({
-                all_privileges: AllPrivileges
-            });
-            res.json(this.responseObject.sendToView());
-        }catch(err){
-            this.responseObject.setStatus(false);
-            this.responseObject.setMessage({
-                general_error: [ErrorHandler(err)],
-            });
-            res.json(this.responseObject.sendToView());
+        //   let objectForCreationOfNewPrivilege = {
+        //     unique_id: uniqueIdDetails.data,
+        //     type_of_user_unique_id: rolesManagement[i].type_of_user_unique_id,
+        //     role_unique_id: rolesManagement[i].role_unique_id,
+        //     created_at: currenctDate,
+        //     updated_at: currenctDate,
+        //     status: rolesManagement[i].status,
+        //   };
+
+          rolesManagement.push({
+            unique_id: uniqueIdDetails.data,
+            type_of_user_unique_id: rolesManagement[i].type_of_user_unique_id,
+            role_unique_id: rolesManagement[i].role_unique_id,
+            created_at: currenctDate,
+            updated_at: currenctDate,
+            status: rolesManagement[i].status,
+          });
+
+          //insert the values into the db
+        //   await this.DbActions.insertData("privileges_tb", [
+        //     objectForCreationOfNewPrivilege,
+        //   ]);
+
+          selectedPrivilege.privileges = rolesManagement;
+          let data = JSON.stringify(selectedPrivilege);
+          fs.writeFileSync(this.RoleManagerFilePath, data);
+
         }
+      }
 
+      //select the all the roles
+    //   let AllPrivileges = await this.selectAllPrivilege();
+
+      //send details to view
+      this.responseObject.setStatus(true);
+      this.responseObject.setMessage("Updates were successful");
+      this.responseObject.setData({
+        all_privileges: rolesManagement,
+      });
+      res.json(this.responseObject.sendToView());
+    } catch (err) {
+      this.responseObject.setStatus(false);
+      this.responseObject.setMessage({
+        general_error: [ErrorHandler(err)],
+      });
+      res.json(this.responseObject.sendToView());
+      console.log(err)
     }
 
     //store the privileges
@@ -305,16 +326,67 @@ class PrivilegeController {
             res.json(this.responseObject.sendToView());
 
         }
-
+      
     }
+  }
 
-    returnStatus(roleSummaryObject, roleTypeOfUserAyy, v){
+//   returnStatus(roleSummaryObject, roleTypeOfUserAyy, v) {
+//     for (let n in roleSummaryObject) {
+//       if (
+//         roleTypeOfUserAyy[v].type_of_user_unique_id ===
+//           roleSummaryObject[n].type_of_user_unique_id &&
+//         roleTypeOfUserAyy[v].role_unique_id ===
+//           roleSummaryObject[n].role_unique_id
+//       ) {
+//         return "no";
+//       }
+//     }
+//     return "yes";
+//   }
 
-        for(let n in roleSummaryObject){
-            if(roleTypeOfUserAyy[v].type_of_user_unique_id === roleSummaryObject[n].type_of_user_unique_id && roleTypeOfUserAyy[v].role_unique_id === roleSummaryObject[n].role_unique_id){
-                return 'no';
-            }
+  async selectAllPrivilege() {
+    //select the all the roles
+    let roles = await this.RolesModel.selectAllRoles(
+      [],
+      "no",
+      "no",
+      "id",
+      "desc"
+    );
+
+    //select all the user types
+    let typeOfUser = await this.TypeOfUsers.selectAllTypeOfUsers(
+      [],
+      "no",
+      "no",
+      "id",
+      "desc"
+    );
+
+    //select the all the privileges
+    let privilege = await this.Priviledges.selectAllPrivileges(
+      [],
+      "no",
+      "no",
+      "id",
+      "desc"
+    );
+
+    let roleTypeOfUserAyy = [];
+
+    if (typeOfUser.length > 0 && roles.length > 0) {
+      for (let i in typeOfUser) {
+        //loop through the users, foreach of the user check the
+        for (let e in roles) {
+          roleTypeOfUserAyy.push({
+            type_of_user_unique_id: typeOfUser[i].unique_id,
+            type_of_user: typeOfUser[i].type_of_user,
+            role_unique_id: roles[e].unique_id,
+            role: roles[e].role,
+          });
         }
+        
+
         return 'yes';
     }
 
@@ -369,13 +441,14 @@ class PrivilegeController {
                     }
                 }
             }
+          }
 
+          if (privilege.length == 0) {
+            roleTypeOfUserAyy[v].status = "inactive";
+          }
         }
-
-        return roleTypeOfUserAyy;
+      }
     }
-
-
 }
 
 module.exports = PrivilegeController;

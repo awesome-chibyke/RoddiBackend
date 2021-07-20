@@ -183,7 +183,6 @@ class CurrencyController {
     }
   }
 
-
   async updateCurrencyRates(req, res){
 
     try {

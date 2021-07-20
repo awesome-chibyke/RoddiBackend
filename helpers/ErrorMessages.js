@@ -15,6 +15,7 @@ class ErrorMessages {
             profile_update_chances:'You have used up your chances for profile, please contact admin for further explanations',//for failed file upload
             type_of_user_exist:'type of user already exist',//for existing type of user
             role_exists:'Role entered already exists',//for existing type of user
+
         }
     }
 }
