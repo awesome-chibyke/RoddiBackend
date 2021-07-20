@@ -157,7 +157,6 @@ class PrivilegeController {
           selectedPrivilege.privileges = rolesManagement;
           let data = JSON.stringify(selectedPrivilege);
           fs.writeFileSync(this.RoleManagerFilePath, data);
-          console.log(rolesManagement)
 
         }
       }

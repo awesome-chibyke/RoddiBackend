@@ -45,6 +45,13 @@
       "deleted_at": null,
       "created_at": "2021-07-10T16:14:50.000Z",
       "updated_at": "2021-07-10T16:14:50.000Z"
+    },
+    {
+      "unique_id": "a2wyovrpl4vg7701lrci",
+      "type_of_user": "super-adminstrator",
+      "description": "the main and highest level of admin",
+      "created_at": "2021-07-19 23:46:28",
+      "updated_at": "2021-07-19 23:46:28"
     }
   ],
   "privileges": [
