@@ -333,7 +333,6 @@ class LoginController {
         }else{
           //
           resolve(token)
-
         }
       });
 
@@ -346,6 +345,8 @@ class LoginController {
     let currentDate = date.format(now, "YYYY-MM-DD HH:mm:ss");
     let expirationTimeFromCreatedTime = date.addDays(now, 2);
     expirationTimeFromCreatedTime = date.format(expirationTimeFromCreatedTime, "YYYY-MM-DD HH:mm:ss");
+    let uniqueIdDetails = await this.Generics.createUniqueId("login_table","unique_id");
+    if (uniqueIdDetails.status === false){ throw new Error(uniqueIdDetails.message); }
 
     //check if the incoming device has been stored before
     let loginAuthDetails = await this.LoginAuthModel.selectAllLoginAuthWhere([['device_name', '=', device_name]]);
@@ -355,12 +356,14 @@ class LoginController {
 
       //send an email to the user that his/her account has been logged into from an unknown position
       let emailSubject = "Account login Activity from an unknown device";
-      let message = `A login activity just occurred on your account with ${settingsDetails.site_name}. Details are listed below: <br> <strong>Email</strong>: userObject.email. <br> <strong>Device Name</strong>: ${device_name}. <br> <strong>Login Time</strong>: ${currentDate}. <br> <strong>IP Address</strong>: ${ip_address}. <br><strong>Location</strong>: ${location}. <br> Please click the link if you did not authorize this action. ${settingsDetails.site_url}/disable_account/`;
+      let message = `A login activity just occurred on your account with ${settingsDetails.site_name}. Details are listed below: <br> <strong>Email</strong>: userObject.email. <br> <strong>Device Name</strong>: ${device_name}. <br> <strong>Login Time</strong>: ${currentDate}. <br> <strong>IP Address</strong>: ${ip_address}. <br><strong>Location</strong>: ${location}. <br> Please click the link if you did not authorize this action. ${settingsDetails.site_url}/disable_account/${uniqueIdDetails.data}`;
       let fullName = this.User.returnFullName(userObject);
 
       await sendGenericMails(userObject, fullName, settingsDetails, emailSubject, message);
 
-    }else{//a situation where the user have not logged in using that device
+    }
+
+    if(loginAuthDetails.length > 0){//a situation where the user have not logged in using that device
 
       //loop through the devices and check the already existing device as off
       for(let u in loginAuthDetails){
@@ -373,9 +376,6 @@ class LoginController {
       }
 
     }
-
-    let uniqueIdDetails = await this.Generics.createUniqueId("login_table","unique_id");
-    if (uniqueIdDetails.status === false){ throw new Error(uniqueIdDetails.message); }
 
     let hashedToken = await this.PasswordHasher.hashPassword(Token);
 
@@ -392,6 +392,7 @@ class LoginController {
       created_at: currentDate,
       updated_at: currentDate,
     });
+
   }
 
 }
