@@ -6,6 +6,7 @@ let UserController = require("../controllers/UserController");
 const verifyToken = require("../helpers/CheckTokenExistense");
 const validator = require("../helpers/validator");
 let CurrencyController = require("../controllers/ChoseCurrencyController");
+// let LoginController = require("../controllers/LoginController")
 
 // Instantiate Functions
 EditProfileController = new EditProfileController();
@@ -13,6 +14,7 @@ UserController = new UserController();
 responseObject = new responseObject();
 TwoFactorController = new TwoFactorController();
 CurrencyController = new CurrencyController();
+// LoginController = new LoginController();
 // Call Express
 var router = express.Router();
 
@@ -124,5 +126,9 @@ router.put("/update_currency", verifyToken, async (req, res) => {
 router.get("/user_profile", verifyToken, async (req, res) => {
   UserController.returnUserProfile(req, res);
 });
+
+// router.post("/disable", verifyToken, async (req, res) => {
+//   LoginController.disableAccount(req, res);
+// });
 
 module.exports = router;

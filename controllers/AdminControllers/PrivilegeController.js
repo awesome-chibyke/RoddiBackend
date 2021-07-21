@@ -61,7 +61,6 @@ class PrivilegeController {
                 roles_management: "required|array|min",
                 'roles_management.*':'required|min:1',
             };
-
             this.valdateFunction(req, PhoneNumberVerificationRule);//call the validation function
             if(this.errorStatus === false){
                 this.responseObject.setStatus(false);

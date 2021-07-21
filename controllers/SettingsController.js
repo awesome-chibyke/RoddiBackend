@@ -6,6 +6,7 @@ const User = require("../model/User");
 const date = require("date-and-time");
 const validator = require("../helpers/validator");
 const Settings = require("../model/Settings");
+const Privileges = require("../model/Priviledges");
 
 class SettingsController {
   constructor() {
@@ -16,6 +17,7 @@ class SettingsController {
     this.Settings = new Settings();
     this.errorMessage = "";
     this.errorStatus = true;
+    this.Privileges = new Privileges();
   }
 
   valdateFunction(req, ValidationRule) {
@@ -73,6 +75,10 @@ class SettingsController {
       if (userObject === false) {
         throw new Error("User does not exist");
       }
+
+      //check privilege
+      let privilege = await this.Privileges.checkUserPrivilege(loggedUser, 'manage_roles');
+      if(privilege === false){ throw new Error('Access Denied')}
 
       //update the settings
       const preferred_currency = req.body.preferred_currency;
