@@ -12,6 +12,7 @@ const Priviledges = require("../../model/Priviledges");
 const TypeOfUsers = require("../../model/TypeOfUsers");
 const authData = require("../../helpers/AuthenticateLogin");
 const validator = require("../../helpers/validator");
+const Privileges = require("../../model/Priviledges");
 const fs = require("fs");
 
 class PrivilegeController {
@@ -50,6 +51,10 @@ class PrivilegeController {
                 let ErrorMessage = this.ErrorMessages.ErrorMessageObjects.authentication_failed;
                 throw new Error(ErrorMessage);
             }
+
+            //check privilege
+            let privilege = await this.Priviledges.checkUserPrivilege(loggedUser, 'manage_roles');
+            if(privilege === false){ throw new Error('Access Denied')}
 
             /*//validate the user type_of_user_unique_id 	role_unique_id
             const PhoneNumberVerificationRule = {//validate the datas for the verification
@@ -246,6 +251,17 @@ class PrivilegeController {
 
         try{
 
+            let loggedUser = await authData(req); //verify the logged in user
+            loggedUser = await this.User.selectOneUser([["unique_id", "=", loggedUser.user.unique_id]]);
+            if(loggedUser === false){
+                let ErrorMessage = this.ErrorMessages.ErrorMessageObjects.authentication_failed;
+                throw new Error(ErrorMessage);
+            }
+
+            //check privilege
+            let privilege = await this.Priviledges.checkUserPrivilege(loggedUser, 'manage_roles');
+            if(privilege === false){ throw new Error('Access Denied'); }
+
             let roleSummaryObject = await this.selectAllPrivilege();
 
             //send details to view
@@ -267,21 +283,6 @@ class PrivilegeController {
         }
       
     }
-
-
-//   returnStatus(roleSummaryObject, roleTypeOfUserAyy, v) {
-//     for (let n in roleSummaryObject) {
-//       if (
-//         roleTypeOfUserAyy[v].type_of_user_unique_id ===
-//           roleSummaryObject[n].type_of_user_unique_id &&
-//         roleTypeOfUserAyy[v].role_unique_id ===
-//           roleSummaryObject[n].role_unique_id
-//       ) {
-//         return "no";
-//       }
-//     }
-//     return "yes";
-//   }
 
     async selectAllPrivilege(){
 

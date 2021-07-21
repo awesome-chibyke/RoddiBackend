@@ -43,9 +43,17 @@ app.use(device.capture());
 app.use(express.static("files"));
 
 app.use(expressip().getIpInfoMiddleware);
+app.use((req, res, next) => {
+    //Access-Control-Allow-Origin
+    res.append('Access-Control-Allow-Origin', ['*']);
+    res.append('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.append('Access-Control-Allow-Headers', 'Content-Type');
+    next();
+});
 
 /*app.use("/", async (req, res) => {
-    res.json(req.ipInfo);
+    //res.json(req.ipInfo);
+    res.header('Access-Control-Allow-Origin', '*');
  });*/
 app.use("/login", login);
 app.use("/register", register);
@@ -65,6 +73,8 @@ app.use("/settings", SettingsRoutes);
 app.use("/users", AdminUserRoute);//two factor routes
 app.use("/roles_management", roleManagementRoutes);//two factor routes
 app.use("/currency", CurrencyRoutes);//two factor routes
+
+
 
 io.on('connection', (socket) => {
     console.log('a user connected');
