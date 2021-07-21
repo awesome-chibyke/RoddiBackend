@@ -12,6 +12,7 @@ const { sendGenericMails } = require("../../Emails/GenericMailSender");
 const ErrorMessages = require("../../helpers/ErrorMessages");
 const DbActions = require("../../model/DbActions");
 const { SendGenericSms } = require("../../helpers/SendGenericSms");
+const Privileges = require("../../model/Priviledges");
 
 //import the mail managers
 var mailler = require("../../Emails/MailAccount");
@@ -29,6 +30,7 @@ class EditController {
     this.errorStatus = true;
     this.ErrorMessages = new ErrorMessages();
     this.DbActions = new DbActions();
+    this.Privileges = new Privileges();
   }
 
   valdateFunction(req, ValidationRule) {
@@ -52,6 +54,10 @@ class EditController {
         let ErrorMessage = this.ErrorMessages.ErrorMessageObjects.invalid_user;
         throw new Error(ErrorMessage);
       }
+
+      //check privilege
+      let privilege = await this.Privileges.checkUserPrivilege(loggedUser, 'manage_roles');
+      if(privilege === false){ throw new Error('Access Denied')}
 
       let type_of_user = req.params.type_of_user;
 
@@ -86,6 +92,9 @@ class EditController {
         let ErrorMessage = this.ErrorMessages.ErrorMessageObjects.invalid_user;
         throw new Error(ErrorMessage);
       }
+      //check privilege
+      let privilege = await this.Privileges.checkUserPrivilege(loggedUser, 'manage_roles');
+      if(privilege === false){ throw new Error('Access Denied')}
 
       let unique_id = req.params.unique_id;
       let UserObject = await this.User.selectOneUser(
@@ -127,6 +136,10 @@ class EditController {
         let ErrorMessage = this.ErrorMessages.ErrorMessageObjects.invalid_user;
         throw new Error(ErrorMessage);
       }
+
+            //check privilege
+            let privilege = await this.Privileges.checkUserPrivilege(loggedUser, 'manage_roles');
+            if(privilege === false){ throw new Error('Access Denied')}
 
       let UserToDelete = await this.User.selectOneUser(
         [
@@ -198,6 +211,10 @@ class EditController {
         throw new Error("User does not exist");
       }
 
+            //check privilege
+            let privilege = await this.Privileges.checkUserPrivilege(loggedUser, 'manage_roles');
+            if(privilege === false){ throw new Error('Access Denied')}
+
       //update the user
       userObject.first_name = req.body.first_name || userObject.first_name;
       userObject.middle_name = req.body.middle_name;
@@ -251,6 +268,10 @@ class EditController {
           this.ErrorMessages.ErrorMessageObjects.authentication_failed;
         throw new Error(ErrorMessage);
       }
+
+            //check privilege
+            let privilege = await this.Privileges.checkUserPrivilege(loggedUser, 'manage_roles');
+            if(privilege === false){ throw new Error('Access Denied')}
 
       let mainUserObject = await this.User.selectOneUser([
         ["unique_id", "=", unique_id],
