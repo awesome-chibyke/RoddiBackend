@@ -380,7 +380,7 @@ class TwoFactorController {
       //send a message to the view that token is correct
       this.responseObject.setData({ email: userObject.email, phone:phone, country_code:country_code});
       this.responseObject.setStatus(true);
-      let MessageType = this.MessageType.returnMessageType('validate_email_for_two_factor_deactivation');
+      let MessageType = this.MessageType.returnMessageType('validate_phone_for_two_factor_deactivation');
       this.responseObject.setMesageType(MessageType);
       this.responseObject.setMessage(
           "An authentication token has been sent to the phone number provided. please provide token to continue"

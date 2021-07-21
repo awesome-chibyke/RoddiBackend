@@ -153,6 +153,19 @@ class RolesController {
   //select all the available roles
   async selectAllRoles(req, res) {
     try {
+
+        let loggedUser = await authData(req); //authenticate user
+        loggedUser = await this.User.selectOneUser([ ["unique_id", "=", loggedUser.user.unique_id] ]);
+
+        if (loggedUser === false) {
+            let ErrorMessage = this.ErrorMessages.ErrorMessageObjects.authentication_failed;
+            throw new Error(ErrorMessage);
+        }
+
+        //check privilege
+        let privilege = await this.Privileges.checkUserPrivilege(loggedUser, 'manage_roles');
+        if(privilege === false){ throw new Error('Access Denied'); }
+
       let thePath = this.RoleManagerFilePath;
       //select the all the roles
       let existingRoleArray = fs.readFileSync(thePath);

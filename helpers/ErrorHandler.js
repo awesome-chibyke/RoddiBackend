@@ -5,9 +5,9 @@ const ErrorHandler = (error) => {
   }
 
   if(process.env.APP_ENV === 'local'){
+
     return error.message + " " + error.stack;
   }
 
 };
-
 module.exports = ErrorHandler;

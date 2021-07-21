@@ -10,6 +10,7 @@ const TypeOfUsers = require("../../model/TypeOfUsers");
 const authData = require("../../helpers/AuthenticateLogin");
 const validator = require("../../helpers/validator");
 const ErrorMessages = require("../../helpers/ErrorMessages");
+const Priviledges = require("../../model/Priviledges");
 const fs = require("fs");
 
 class TypeOfUserController {
@@ -24,6 +25,7 @@ class TypeOfUserController {
     this.User = new User();
     this.TypeOfUsers = new TypeOfUsers();
     this.ErrorMessages = new ErrorMessages();
+    this.Priviledges = new Priviledges();
     this.RoleManagerFilePath = this.TypeOfUsers.RoleManagerFilePath;
   }
 
@@ -48,6 +50,10 @@ class TypeOfUserController {
           this.ErrorMessages.ErrorMessageObjects.authentication_failed;
         throw new Error(ErrorMessage);
       }
+
+      //check privilege
+      let privilege = await this.Priviledges.checkUserPrivilege(loggedUser, 'manage_roles');
+      if(privilege === false){ throw new Error('Access Denied'); }
 
       //validate the user
       const TypeOfUserVerificationRule = {
@@ -128,6 +134,18 @@ class TypeOfUserController {
 
   async selectAllTypeOfUsers(req, res) {
     try {
+
+      let loggedUser = await authData(req);
+      loggedUser = await this.User.selectOneUser([ ["unique_id", "=", loggedUser.user.unique_id] ]);
+      if (loggedUser === false) {
+        let ErrorMessage = this.ErrorMessages.ErrorMessageObjects.authentication_failed;
+        throw new Error(ErrorMessage);
+      }
+
+      //check privilege
+      let privilege = await this.Priviledges.checkUserPrivilege(loggedUser, 'manage_roles');
+      if(privilege === false){ throw new Error('Access Denied'); }
+
       let thePath = this.RoleManagerFilePath;
       //select the all the roles
       let existingTypeOfUserArray = fs.readFileSync(thePath);
