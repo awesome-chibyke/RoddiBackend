@@ -107,6 +107,7 @@ class EditController {
         general_error: [ErrorHandler(err)],
       });
       res.json(this.responseObject.sendToView());
+      console.log(err)
     }
   }
 

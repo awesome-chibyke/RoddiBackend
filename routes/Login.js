@@ -1,6 +1,7 @@
 var express = require("express");
 let responseObject = require("../controllers/ViewController");
 responseObject = new responseObject();
+const verifyToken = require("../helpers/CheckTokenExistense");
 
 //validation helper
 const validator = require("../helpers/validator");
@@ -71,6 +72,10 @@ router.post("/authenticate", async (req, res) => {
 //validate the login using 2 factor auth
 router.post("/authenticate_login_with_two_factor", async (req, res) => {
   await LoginController.authenticateLoginWithTwoFactor(req, res);
+});
+
+router.post("/disable_login/:unique_id", verifyToken, async (req, res) => {
+  LoginController.disableAccount(req, res);
 });
 
 module.exports = router;
