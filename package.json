@@ -21,6 +21,7 @@
     "express-device": "^0.4.2",
     "express-ip": "^1.0.4",
     "express-validator": "^6.10.0",
+    "firebase-admin": "^9.11.0",
     "fs": "0.0.1-security",
     "generate-unique-id": "^2.0.1",
     "iso-country-currency": "^0.5.3",

@@ -14,11 +14,16 @@ router.use(
     })
 );
 
+router.get("/", async (req, res) => {
+    var io = req.app.get('socketio');
+    io.emit('tweet', 'it has really worked');
+    return res.json('it worked')
+});
+
 //return the user object
 router.get("/get_settings", async (req, res) => {
     SettingsController.selectSettings(req, res);
 });
 
 module.exports = router;
-
 //selectAllPrivileges

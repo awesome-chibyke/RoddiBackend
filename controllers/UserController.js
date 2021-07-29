@@ -4,6 +4,7 @@ const ErrorHandler = require("../helpers/ErrorHandler");
 const verifyToken = require("../helpers/AuthenticateLogin");
 const authData = require("../helpers/AuthenticateLogin");
 const User = require("../model/User");
+const LoginAuthModel = require("../model/LoginAuthModel");
 const date = require("date-and-time");
 const SendWelcomeEmailAfterActivation = require("../Emails/SendWelcomeEmailAfterActivation");
 const jwt = require("jsonwebtoken");
@@ -15,6 +16,7 @@ class UserController {
     this.responseObject = new responseObject();
     this.AuthenticationCode = new AuthenticationCode();
     this.User = new User();
+    this.LoginAuthModel = new LoginAuthModel();
     this.AccountVerificationLevels = new AccountVerificationLevels();
     this.SendWelcomeEmailAfterActivation =
       new SendWelcomeEmailAfterActivation();
@@ -26,6 +28,10 @@ class UserController {
       //get values from the body
       const email = req.body.email;
       const token = req.body.token;
+    let IpInformation = await this.User.returnIpDetails(req);
+    let ip_address = IpInformation.query;
+    let location = `${IpInformation.city} ${IpInformation.regionName}, ${IpInformation.country}`;
+    let device_name = req.body.device_name;
 
       //select the user involved
       let userObject = await this.User.selectOneUser([["email", "=", email]]);
@@ -61,15 +67,26 @@ class UserController {
       let welcomeEmail =
         this.SendWelcomeEmailAfterActivation.sendMail(userObject);
 
-      //use jwt to create a token_type//create the jwt token and send to the view
-      jwt.sign({ user: userObject }, "secretkey", async (err, token) => {
+        //create the jwt token
+        let createdToken = await this.LoginAuthModel.secondLayerAuth(userObject);
+        await this.LoginAuthModel.generateToken(
+            userObject,
+            ip_address,
+            device_name,
+            createdToken,
+            location
+        );
+
         this.responseObject.setMesageType("normal");
+        //delete the properties that is not supposed t be sent to view
         let userObjectForView = await this.User.returnUserForView(userObject);
-        this.responseObject.setData({ token: token, user: userObjectForView });
+        this.responseObject.setData({
+            token: createdToken,
+            user: userObjectForView,
+        });
         this.responseObject.setStatus(true);
         this.responseObject.setMessage("Account activation was successful, you have been successfully logged in");
         res.status(200).json(this.responseObject.sendToView());
-      });
 
       //send the
     } catch (e) {

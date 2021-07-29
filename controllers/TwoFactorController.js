@@ -549,6 +549,7 @@ class TwoFactorController {
       let UpdatedUserObject = await this.User.updateUser({
         unique_id:userObject.unique_id,
         oauth_disable_steps:null,
+        auth_type:'email',
         oauth_disable_request:null,
         oauth_disable_request_time :null,
         updated_at :currenctDate
@@ -620,7 +621,7 @@ class TwoFactorController {
         //update the user columns for 2factor deactivation
           UpdatedUserObject = await this.User.updateUser({
           unique_id:userObject.unique_id,
-          auth_type:null,
+          auth_type:'email',
           oauth_disable_steps:null,
           oauth_disable_request:null,
           oauth_disable_request_time :null,
