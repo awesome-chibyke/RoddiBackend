@@ -3,6 +3,7 @@ const Settings = require("./Settings");
 const speakeasy = require("speakeasy");
 const AccountVerificationLevels = require("../helpers/AccountVerificationLevels");
 const { GetRequest, PostRequest } = require("../helpers/ExternalRequest");
+const jwt = require("jsonwebtoken");
 
 var QRCode = require("qrcode");
 var fs = require("fs");

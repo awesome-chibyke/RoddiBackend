@@ -16,6 +16,7 @@ const resendActivationEmailRoute = require("./routes/resendActivationEmailRoute"
 const IdUploadRoute = require("./routes/IdUploadRoute");
 const ForgetPasswordRoute = require("./routes/ForgetPasswordRoute");
 const TwoFactorSetupRoutes = require("./routes/TwoFactorSetupRoutes");
+const LogoutRoute = require("./routes/LogoutRoute");
 
 
 const AdminUserRoute = require("./routes/AdminUserRoute");
@@ -34,11 +35,34 @@ const app = express();
 const port = 3400;
 
 const server = http.createServer(app);//start up socket.io
-const { Server } = require("socket.io");
-const io = new Server(server);
+/*const { Server } = require("socket.io");
+const io = new Server(server);*/
+
+// server-side
+const io = require("socket.io")(server, {
+    cors: {
+        origins: "*",//http://localhost
+        methods: ["GET", "POST"]
+    }
+});
+/*const io = require("socket.io")(server, {
+    handlePreflightRequest: (req, res) => {
+        console.log(req.headers.origin);
+        const headers = {//req.headers.origin
+            "Access-Control-Allow-Headers": "Content-Type, Authorization",
+            "Access-Control-Allow-Origin": 'http://localhost', //or the specific origin you want to give access to,
+            "Access-Control-Allow-Credentials": true
+        };
+        res.writeHead(200, headers);
+        res.end();
+    }
+});*/
 
 app.use(cors());
 app.use(device.capture());
+
+//set socket
+app.set('socketio', io);
 
 app.use(express.static("files"));
 
@@ -67,6 +91,7 @@ app.use("/forgot-password", ForgetPasswordRoute);//forgot password routes
 app.use("/two_factor", TwoFactorSetupRoutes);//two factor routes
 app.use("/tester", TestRoutes);//two factor routes
 app.use("/settings", SettingsRoutes);
+app.use("/logout", LogoutRoute);
 
 
 //admin routes
@@ -76,8 +101,8 @@ app.use("/currency", CurrencyRoutes);//two factor routes
 
 
 
+
 io.on('connection', (socket) => {
-    console.log('a user connected');
     socket.on('disconnect', () => {
         console.log('user disconnected');
     });

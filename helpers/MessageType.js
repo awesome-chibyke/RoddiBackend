@@ -4,6 +4,7 @@ class MessageType{
             account_activation:'activate_account',//for account activation
             phone_verification:'phone_verification',//for account activation
             normal:'normal',
+            logout:'logout',
             blocked_account:'blocked_account',//for blocked account
             update_profile:'update_profile',//for blocked account
             login_auth_email_phone:'login_auth_email_phone',//for login verification with emial

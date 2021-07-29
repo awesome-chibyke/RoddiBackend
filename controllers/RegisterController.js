@@ -1,5 +1,6 @@
 const responseObject = require("./ViewController");
 const PasswordHasher = require("../helpers/PasswordHasher");
+const ErrorMessages = require("../helpers/ErrorMessages");
 const Generics = require("../helpers/Generics");
 const AuthenticationCode = require("../helpers/AuthenticationCode");
 const date = require("date-and-time");
@@ -22,6 +23,7 @@ class RegisterController {
     this.MessageType = new MessageType();
     this.User = new User();
     this.Currency = new Currency();
+    this.ErrorMessages = new ErrorMessages();
   }
 
   async register(req, res) {
@@ -43,8 +45,8 @@ class RegisterController {
       }
 
       let uniqueIdDetails = await this.Generics.createUniqueId(
-        "users",
-        "unique_id"
+          "users",
+          "unique_id"
       );
 
       if (uniqueIdDetails.status === false) {
@@ -96,21 +98,32 @@ class RegisterController {
 
   async resendActivationEmail(req, res){
 
-    let email = req.body.email;
+    try{
+      let email = req.body.email;
 
-    let userObject = await this.User.selectOneUser([['email', '=', email]]);
-    let sendMail = await this.SendWelcomeEmail.sendMail(userObject);
+      let userObject = await this.User.selectOneUser([['email', '=', email]]);
+      if(userObject === false){
 
-    this.responseObject.setStatus(true);
-    this.responseObject.setMessage("An account activation code has been sent to your email. please supply code to activate account.");
-    delete userObject.password;
-    //get the message type for view activate-account')
-    let MessageType = this.MessageType.returnMessageType('account_activation');
-    this.responseObject.setMesageType(MessageType);
-    this.responseObject.setData({
-      email: userObject.email
-    });
-    res.json(this.responseObject.sendToView());
+        let ErrorMessage = this.ErrorMessages.ErrorMessageObjects.authentication_failed
+        throw new Error(ErrorMessage);
+      }
+      let sendMail = await this.SendWelcomeEmail.sendMail(userObject);
+
+      this.responseObject.setStatus(true);
+      this.responseObject.setMessage("An account activation code has been sent to your email. please supply code to activate account.");
+      delete userObject.password;
+      //get the message type for view activate-account')
+      let MessageType = this.MessageType.returnMessageType('account_activation');
+      this.responseObject.setMesageType(MessageType);
+      this.responseObject.setData({
+        email: userObject.email
+      });
+      res.json(this.responseObject.sendToView());
+    }catch(err){
+      this.responseObject.setStatus(false);
+      this.responseObject.setMessage({ general_error: [ErrorHandler(err)] });
+      res.json(this.responseObject.sendToView());
+    }
 
   }
 
