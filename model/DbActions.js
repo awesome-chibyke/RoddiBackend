@@ -154,6 +154,39 @@ class DbActions {
     }
   }
 
+  async restoreDeleteDataFromTable(mainTableFilterName, mainTableFilterColumn, unique_id, table_array = [], column_for_filtering = 'user_unique_id'){
+    //get the current date
+    let currentTime = null;
+
+    await this.updateData(mainTableFilterName, {//update the deleted at column
+      fields: {deleted_at:currentTime},
+      filteringConditions: [[mainTableFilterColumn, "=", unique_id]],
+    });
+
+    if(table_array.length > 0){//check the lenght of the table array
+      for(let i in table_array){//loop through the array
+        let dataToDelete = await this.selectBulkData(table_array[i], {//select the bulk of data from the particular table
+          filteringConditions: [[column_for_filtering, "=", unique_id]],
+        });
+
+        if(dataToDelete.length > 0){//check if the selected data is more than 0
+          for(let m in dataToDelete){//loop through the selected data
+            await this.updateData(table_array[i], {//update the deleted at column
+              fields: {deleted_at:currentTime},
+              filteringConditions: [['unique_id', "=", dataToDelete[m].unique_id]],
+            })
+          }
+        }
+
+        return {
+          status:true,
+          message:'Delete action was successful'
+        }
+
+      }
+    }
+  }
+
 
 }
 

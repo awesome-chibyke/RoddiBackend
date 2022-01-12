@@ -164,7 +164,7 @@ class ForgotPasswordController {
                 token:"required|numeric",
             };
 
-            if(message_type === forgot_password_email_auth){ validationRule.token_type = "required|string"; }//assign the token_type when its an email auth
+            //if(message_type === forgot_password_email_auth){ validationRule.token_type = "required|string"; }//assign the token_type when its an email auth
 
             this.valdateFunction(req, validationRule);
             if(this.errorStatus === false){
@@ -236,8 +236,6 @@ class ForgotPasswordController {
             res.json(this.responseObject.sendToView());
         }
     }
-
-
 
     //change user password
     async changeUserPassword(req, res){

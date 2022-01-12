@@ -15,4 +15,11 @@ router.use(
 router.put("/", verifyToken, async (req, res) => {
   SettingsController.editSettings(req, res);
 });
+
+//return the user object
+router.get("/get_settings", async (req, res) => {
+    SettingsController.selectSettings(req, res);
+});
+
+
 module.exports = router;

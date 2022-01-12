@@ -58,13 +58,14 @@ class Priviledges{
         return userObject;
     }
 
-    async returnRoleObject(MainRoleManagementObject, role_unique_id){
+    async returnRoleObject(MainRoleManagementObject, role_unique_id_or_role_name){
         let selectedRoleObject = null;
         //get the type of user
         let rolesArray = MainRoleManagementObject.roles;
         if(rolesArray.length > 0){
             for(let e in rolesArray){
-                if(role_unique_id === rolesArray[e].unique_id){
+
+                if(role_unique_id_or_role_name === rolesArray[e].unique_id || role_unique_id_or_role_name === rolesArray[e].role){
                     selectedRoleObject = rolesArray[e];
                     break
                 }
@@ -79,7 +80,7 @@ class Priviledges{
         let typeOfUserArray = MainRoleManagementObject.type_of_users;
         if(typeOfUserArray.length > 0){
             for(let m in typeOfUserArray){
-                if(typeOfUser === typeOfUserArray[m].unique_id){
+                if(typeOfUser === typeOfUserArray[m].unique_id || typeOfUser === typeOfUserArray[m].type_of_user){
                     selectedTypeOfUserObject = typeOfUserArray[m];
                     break
                 }
@@ -94,7 +95,7 @@ class Priviledges{
 
         //loop through the privilege array to get the status os this user type privilege
         for(let i in privilegeArray){
-            if(privilegeArray[i].role_unique_id === selectedRoleObject.unique_id && privilegeArray[i].type_of_user_unique_id === selectedTypeOfUserObject.unique_id){
+            if(privilegeArray[i].role_unique_id === selectedRoleObject.role_unique_id && privilegeArray[i].type_of_user_unique_id === selectedTypeOfUserObject.type_of_user_unique_id){
                 selectedPrivilegeObject = privilegeArray[i];
                 count = i;
                 break;
@@ -104,7 +105,7 @@ class Priviledges{
     }
 
     //check user privilege
-    async checkUserPrivilege(userObject, role_unique_id){
+    async checkUserPrivilege(userObject, role_name){
 
         const filePath = this.RolesFilePath;
         let existingRoleManagementObject = fs.readFileSync(filePath);
@@ -114,7 +115,7 @@ class Priviledges{
         let typeOfUser = userObject.type_of_user;
 
         //get the role
-        let selectedRoleObject = await this.returnRoleObject(existingRoleManagementObject, role_unique_id);
+        let selectedRoleObject = await this.returnRoleObject(existingRoleManagementObject, role_name);
         if(selectedRoleObject === null){ return false; }
 
         let selectedTypeOfUserObject = await this.returnTypeOfUserObject(existingRoleManagementObject, typeOfUser);
@@ -131,6 +132,7 @@ class Priviledges{
                 break;
             }
         }
+
         if(selectedPrivilegeObject === null){ return false; }
 
         if(selectedPrivilegeObject.status === 'inactive'){
@@ -161,6 +163,28 @@ class Priviledges{
     let existingObject = fs.readFileSync(thePath);
     existingObject = JSON.parse(existingObject);
     return existingObject;
+  }
+
+  async getAllPrivilegeForALoggedInUser(userObject){
+      const filePath = this.RolesFilePath;
+      let existingRoleManagementObject = fs.readFileSync(filePath);
+      existingRoleManagementObject = JSON.parse(existingRoleManagementObject);
+
+      //get the type of user
+      let typeOfUser = userObject.type_of_user;
+
+      let privilegeArray = existingRoleManagementObject.privileges;
+      let selectedPrivilegeArray = [];
+
+      //loop through the privilege array to get the status os this user type privilege
+      for(let i in privilegeArray){
+          if(privilegeArray[i].status === 'active' && privilegeArray[i].type_of_user === typeOfUser){
+              selectedPrivilegeArray.push(privilegeArray[i].role)
+          }
+      }
+
+      return selectedPrivilegeArray;
+
   }
 
 }

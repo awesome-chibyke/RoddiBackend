@@ -16,7 +16,7 @@ class AccountVerificationLevels {
         this.completed = 'completed';
 
 
-        this.verificationSteps = ['none', this.account_activation_verification_step, this.phone_verification_step, this.profile_update_verification_step,  this.face_verification_step, this.id_verification_step, this.completed];
+        this.verificationSteps = [this.account_activation_verification_step, this.phone_verification_step, this.profile_update_verification_step,  this.face_verification_step, this.id_verification_step, this.completed];
 
         this.verifiation_details = {
             account_activation_verification_level:this.account_activation_verification_level,
@@ -38,6 +38,9 @@ class AccountVerificationLevels {
         this.id_face_pending = 'under_review';
         this.id_face_confirmed = 'confirmed';
         this.id_face_declined = 'declined';
+
+        this.id_face_unconfirmed = 'none';
+        this.id_upload_unconfirmed = 'none';
     }
 
     //check user verification step

@@ -16,30 +16,30 @@ const Privileges = require("../../model/Priviledges");
 const fs = require("fs");
 
 class PrivilegeController {
-  constructor() {
-    this.errorMessage = "";
-    this.errorStatus = false;
-    this.responseObject = new responseObject();
-    this.DbActions = new DbActions();
-    this.AuthenticationCode = new AuthenticationCode();
-    this.Generics = new Generics();
-    this.MessageType = new MessageType();
-    this.User = new User();
-    this.RolesModel = new RolesModel();
-    this.Priviledges = new Priviledges();
-    this.TypeOfUsers = new TypeOfUsers();
-    this.ErrorMessages = new ErrorMessages();
-    this.RoleManagerFilePath = this.Priviledges.RoleManagerFilePath;
-  }
+    constructor() {
+        this.errorMessage = "";
+        this.errorStatus = false;
+        this.responseObject = new responseObject();
+        this.DbActions = new DbActions();
+        this.AuthenticationCode = new AuthenticationCode();
+        this.Generics = new Generics();
+        this.MessageType = new MessageType();
+        this.User = new User();
+        this.RolesModel = new RolesModel();
+        this.Priviledges = new Priviledges();
+        this.TypeOfUsers = new TypeOfUsers();
+        this.ErrorMessages = new ErrorMessages();
+        this.RoleManagerFilePath = this.Priviledges.RoleManagerFilePath;
+    }
 
-  valdateFunction(req, ValidationRule) {
-    validator(req.body, ValidationRule, {}, (err, status) => {
-      if (status === false) {
-        this.errorMessage = err;
-      }
-      this.errorStatus = status;
-    });
-  }
+    valdateFunction(req, ValidationRule) {
+        validator(req.body, ValidationRule, {}, (err, status) => {
+            if (status === false) {
+                this.errorMessage = err;
+            }
+            this.errorStatus = status;
+        });
+    }
 
     //store the privileges
     async storePrivilege(req, res){
@@ -73,8 +73,9 @@ class PrivilegeController {
             existingRoleManagementObject = JSON.parse(existingRoleManagementObject);
 
             let rolesManagement = req.body.roles_management;//the role management from the front end
+            rolesManagement = JSON.parse(rolesManagement);
 
-            rolesManagement = [
+            /*rolesManagement = [
                 {
                     "type_of_user_unique_id": "oqsi4mgom8q8g8is7xya",
                     "type_of_user": "super-admin",
@@ -180,12 +181,13 @@ class PrivilegeController {
                     "role": "delete_users",
                     "status": "active"
                 }
-            ];
+            ];*/
 
             let privilegeArray = existingRoleManagementObject.privileges;
 
             //loop through the role management data and add to the db
             for(let i in rolesManagement){
+
                 let objectForUpdate = {};
                 //select the details to check if the details exist
                 let selectedPrivilege = await this.Priviledges.returnPriviledge(privilegeArray, rolesManagement[i], rolesManagement[i]);
@@ -280,7 +282,7 @@ class PrivilegeController {
             res.json(this.responseObject.sendToView());
 
         }
-      
+
     }
 
     async selectAllPrivilege(){
@@ -335,10 +337,10 @@ class PrivilegeController {
                 }
             }
 
-          }
-
-          return roleTypeOfUserAyy;
         }
+
+        return roleTypeOfUserAyy;
+    }
 }
 
 module.exports = PrivilegeController;

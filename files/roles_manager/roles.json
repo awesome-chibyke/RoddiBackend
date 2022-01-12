@@ -179,7 +179,7 @@
       "deleted_at": null,
       "created_at": "2021-07-20 14:50:05",
       "updated_at": "2021-07-20 14:50:05",
-      "status": "inactive"
+      "status": "active"
     },
     {
       "unique_id": "16jb3mbage84xuyuf1j3",
@@ -212,7 +212,7 @@
       "deleted_at": null,
       "created_at": "2021-07-20 14:50:05",
       "updated_at": "2021-07-20 14:50:05",
-      "status": "inactive"
+      "status": "active"
     },
     {
       "unique_id": "4kk281lz9mzzxrjkk84a",
@@ -367,17 +367,6 @@
       "created_at": "2021-07-20 14:51:14",
       "updated_at": "2021-07-20 14:51:14",
       "status": "inactive"
-    },
-    {
-      "unique_id": "b7mt4dxluhinp8wtpioi",
-      "type_of_user_unique_id": "a2wyovrpl4vg7701lrci",
-      "type_of_user": "super-adminstrator",
-      "role_unique_id": "1c0j6h8qxfgk5itflakq",
-      "role": "manage_roles",
-      "deleted_at": null,
-      "created_at": "2021-07-20 14:51:14",
-      "updated_at": "2021-07-20 14:51:14",
-      "status": "active"
     },
     {
       "unique_id": "je5q0mapqedtnok7h139",

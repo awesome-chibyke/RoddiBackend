@@ -1,9 +1,12 @@
 const DbActions = require("../model/DbActions");
+const User = require("../model/User");
+
 const fs = require("fs");
 class Currency {
   constructor() {
     this.DbActions = new DbActions();
-    
+    this.User = new User();
+
     this.currencyCodeArray = [
       "BIF","CAD","CDF","CVE","EUR","GBP","GHS","GMD","GNF","KES","LRD","MWK","MZN","NGN","RWF","SLL","STD","TZS","UGX","USD","XAF","XOF","ZMK","ZMW","ZWD","ZAR",
     ];
@@ -76,6 +79,35 @@ class Currency {
     }
 
     return newCurrencyArray;
+  }
+
+  async defaultCurrency(req, res){
+
+    try{
+      let IpInformation = await this.User.returnIpDetails(req);
+      let currency = IpInformation.currency;
+      let countryCode = IpInformation.countryCode;
+      let selectedCurrency = await this.fetchCurrencyBasedOnCountryCode(countryCode);
+
+      if(Object.keys(selectedCurrency).length == 0){
+        selectedCurrency = await this.fetchCurrencyBasedOnCountryCode('USD');
+      }
+
+      return {
+        status:true,
+        message:'',
+        data:{selected_currency:selectedCurrency, ip_information:IpInformation}
+      }
+
+    }catch(e){
+
+      return {
+        status:true,
+        message:ErrorHandler(e),
+        data:[]
+      }
+
+    }
   }
 
 }

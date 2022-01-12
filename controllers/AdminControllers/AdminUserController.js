@@ -31,6 +31,10 @@ class EditController {
     this.ErrorMessages = new ErrorMessages();
     this.DbActions = new DbActions();
     this.Privileges = new Privileges();
+
+    this.id_back_image_link = 'government_id_back/';
+    this.id_front_image_link = 'government_id_front/';
+    this.face_image_link = 'faceUploads/';
   }
 
   valdateFunction(req, ValidationRule) {
@@ -56,19 +60,19 @@ class EditController {
       }
 
       //check privilege
-      let privilege = await this.Privileges.checkUserPrivilege(loggedUser, 'manage_roles');
+      let privilege = await this.Privileges.checkUserPrivilege(userObject, 'manage_roles');
       if(privilege === false){ throw new Error('Access Denied')}
 
       let type_of_user = req.params.type_of_user;
 
-      let allUsers = await this.User.selectAllUsersWhere(
+      let allUsers = await this.User.selectAllUsers(
         [["type_of_user", "=", type_of_user]],
         "no"
       );
 
       //return value to view
       this.responseObject.setStatus(true);
-      this.responseObject.setData({ all_users: allUsers });
+      this.responseObject.setData({ all_users: allUsers, id_back_image_link:this.id_back_image_link, id_front_image_link:this.id_front_image_link,face_image_link:this.face_image_link });
       this.responseObject.setMessage("User have been successfully returned");
       res.json(this.responseObject.sendToView());
     } catch (err) {
@@ -93,7 +97,7 @@ class EditController {
         throw new Error(ErrorMessage);
       }
       //check privilege
-      let privilege = await this.Privileges.checkUserPrivilege(loggedUser, 'manage_roles');
+      let privilege = await this.Privileges.checkUserPrivilege(userObject, 'manage_roles');
       if(privilege === false){ throw new Error('Access Denied')}
 
       let unique_id = req.params.unique_id;
@@ -120,7 +124,7 @@ class EditController {
     }
   }
 
-  //select all user for admin view
+  //delete a user
   async deleteUser(req, res) {
     try {
       //the details fromm param
@@ -138,7 +142,7 @@ class EditController {
       }
 
             //check privilege
-            let privilege = await this.Privileges.checkUserPrivilege(loggedUser, 'manage_roles');
+            let privilege = await this.Privileges.checkUserPrivilege(userObject, 'manage_roles');
             if(privilege === false){ throw new Error('Access Denied')}
 
       let UserToDelete = await this.User.selectOneUser(
@@ -161,7 +165,7 @@ class EditController {
         "user_unique_id"
       );
 
-      let allUsers = await this.User.selectAllUsersWhere(
+      let allUsers = await this.User.selectAllUsers(
         [["type_of_user", "=", type_of_user]],
         "no"
       );
@@ -170,6 +174,66 @@ class EditController {
       this.responseObject.setStatus(true);
       this.responseObject.setData({ all_users: allUsers });
       this.responseObject.setMessage("User have been successfully deleted");
+      res.json(this.responseObject.sendToView());
+    } catch (err) {
+      this.responseObject.setStatus(false);
+      this.responseObject.setMessage({
+        general_error: [ErrorHandler(err)],
+      });
+      res.json(this.responseObject.sendToView());
+    }
+  }
+
+  async restoreDeletedUser(req, res) {
+    try {
+
+      //the details fromm params
+      let type_of_user = req.params.type_of_user;
+      let unique_id = req.params.unique_id;
+
+      //authenticate user
+      let userObject = await authData(req);
+      userObject = await this.User.selectOneUser([
+        ["unique_id", "=", userObject.user.unique_id],
+      ]);
+      if (userObject === false) {
+        let ErrorMessage = this.ErrorMessages.ErrorMessageObjects.invalid_user;
+        throw new Error(ErrorMessage);
+      }
+
+      //check privilege
+      let privilege = await this.Privileges.checkUserPrivilege(userObject, 'manage_roles');
+      if(privilege === false){ throw new Error('Access Denied')}
+
+      let UserToRestore = await this.User.selectOneUser(
+          [
+            ["unique_id", "=", unique_id],
+            ["type_of_user", "=", type_of_user],
+          ],
+          "no"
+      );
+      if (UserToRestore === false) {
+        throw new Error("Id supplied does not match that of any user");
+      }
+
+      //restore the user
+      await this.DbActions.restoreDeleteDataFromTable(
+          "users",
+          "unique_id",
+          unique_id,
+          [],
+          'user_unique_id'
+      );
+
+      let allUsers = await this.User.selectAllUsers(
+          [["type_of_user", "=", type_of_user]],
+          "no"
+      );
+
+      //return value to view
+      this.responseObject.setStatus(true);
+      this.responseObject.setData({ all_users: allUsers });
+      this.responseObject.setMessage("User have been successfully restored");
       res.json(this.responseObject.sendToView());
     } catch (err) {
       this.responseObject.setStatus(false);
@@ -212,34 +276,28 @@ class EditController {
       }
 
             //check privilege
-            let privilege = await this.Privileges.checkUserPrivilege(loggedUser, 'manage_roles');
-            if(privilege === false){ throw new Error('Access Denied')}
+      let privilege = await this.Privileges.checkUserPrivilege(userObject, 'manage_roles');
+      if(privilege === false){ throw new Error('Access Denied')}
 
       //update the user
-      userObject.first_name = req.body.first_name || userObject.first_name;
-      userObject.middle_name = req.body.middle_name;
-      userObject.last_name = req.body.last_name;
-      userObject.address = req.body.address;
-      userObject.state = req.body.state;
-      userObject.country = req.body.country;
-      userObject.city = req.body.city;
-      userObject.zip_code = req.body.zip_code;
-      userObject.account_verification_level =
-        parseFloat(userObject.account_verification_level) +
-        parseFloat(
-          this.AccountVerificationLevels.profile_update_verification_level
-        ); //bring the profile update level //bring the profile update level
-      userObject.account_verification_step =
-        this.AccountVerificationLevels.profile_update_verification_step; //bring the profile update level
+      let userObjectToUpdate = {};
+      userObjectToUpdate.first_name = req.body.first_name;
+      userObjectToUpdate.middle_name = req.body.middle_name;
+      userObjectToUpdate.last_name = req.body.last_name;
+      userObjectToUpdate.address = req.body.address;
+      userObjectToUpdate.state = req.body.state;
+      userObjectToUpdate.country = req.body.country;
+      userObjectToUpdate.city = req.body.city;
+      userObjectToUpdate.zip_code = req.body.zip_code;
+      userObjectToUpdate.unique_id = req.body.unique_id;
 
-      let updatedUserObject = await this.User.updateUser(userObject);
+      let updatedUserObject = await this.User.updateUser(userObjectToUpdate);
+
+      let allUsers = await this.User.selectAllUsers([], 'no');
 
       //return value to view
       this.responseObject.setStatus(true);
-      let userObjectForView = await this.User.returnUserForView(
-        updatedUserObject
-      );
-      this.responseObject.setData({ user: userObjectForView });
+      this.responseObject.setData({ all_users: allUsers });
       this.responseObject.setMessage("User Update was Successful");
       res.json(this.responseObject.sendToView());
     } catch (e) {
@@ -395,11 +453,11 @@ class EditController {
 
         //send response to the view
         this.responseObject.setStatus(true);
-        let userDataForView = await this.User.returnUserForView(
-          updatedUserObject,
-          loggedUser.type_of_user
+        let allUsers = await this.User.selectAllUsers(
+            [],
+            "no"
         );
-        this.responseObject.setData({ user: userDataForView });
+        this.responseObject.setData({ all_users: allUsers });
         this.responseObject.setMessage(
           "You Have Successfully Updated The User Account"
         );

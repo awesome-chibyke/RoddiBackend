@@ -24,12 +24,21 @@ router.get("/single_user/:unique_id", verifyToken, async (req, res) => {
   await AdminUserController.SelectOneUserForAdminView(req, res);
 });
 
-//select one user on the db
+//delete a user
 router.get(
   "/delete_user/:unique_id/:type_of_user",
   verifyToken,
   async (req, res) => {
     await AdminUserController.deleteUser(req, res);
+
+  });
+
+//restore a deleted user
+router.get(
+  "/reverse_user_delete/:unique_id/:type_of_user",
+  verifyToken,
+  async (req, res) => {
+    await AdminUserController.restoreDeletedUser(req, res);
 
   });
 

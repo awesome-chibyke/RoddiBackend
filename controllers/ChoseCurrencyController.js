@@ -40,10 +40,17 @@ class CurrencyController {
       }
 
       let NeededCurrency = this.Currency.getAllNeededCurrency(allCurrency);
-      //let NeededCurrency = allCurrency;
+
+      //get the default currency
+      let defaultCurrency = await this.Currency.defaultCurrency(req, res);
+      if(defaultCurrency.status === false){
+        throw new Error(defaultCurrency.message);
+      }
+
       //return value to view
       this.responseObject.setStatus(true);
-      this.responseObject.setData({ currency_array: NeededCurrency });
+      let {selected_currency, ip_information} = defaultCurrency.data;
+      this.responseObject.setData({ currency_array: NeededCurrency, default_currency:selected_currency, location_details:ip_information });
       this.responseObject.setMessage("All currencies has been fetched");
       res.json(this.responseObject.sendToView());
     } catch (e) {

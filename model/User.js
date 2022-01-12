@@ -3,6 +3,7 @@ const Settings = require("./Settings");
 const speakeasy = require("speakeasy");
 const AccountVerificationLevels = require("../helpers/AccountVerificationLevels");
 const { GetRequest, PostRequest } = require("../helpers/ExternalRequest");
+const Priviledges = require("../model/Priviledges");
 const jwt = require("jsonwebtoken");
 
 var QRCode = require("qrcode");
@@ -12,6 +13,7 @@ class User {
   constructor() {
     this.DbActions = new DbActions();
     this.Settings = new Settings();
+    this.Priviledges = new Priviledges();
     this.AccountVerificationLevels = new AccountVerificationLevels();
     this.AccountActionDelayTimeForAdminAction = 48;
   }
@@ -136,6 +138,9 @@ class User {
       this.AccountVerificationLevels.verifiation_details;
     userObj.current_verification_step =
       this.AccountVerificationLevels.checkUserVerificationStep(userObj);
+    userObj.verification_links = ['/activation/:email', '/phone_verify', '/profile', '/upload_face', '/upload_id', '/completed'];
+    userObj.possibilties =
+        await this.Priviledges.getAllPrivilegeForALoggedInUser(userObj);
 
     return userObj;
   }

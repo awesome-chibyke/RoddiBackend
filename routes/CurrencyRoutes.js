@@ -25,5 +25,10 @@ router.get("/update_currency_rates", async (req, res) => {
     CurrencyController.updateCurrencyRates(req, res);
 });
 
+//default_currency
+router.get("/default_currency", async (req, res) => {
+    CurrencyController.defaultCurrency(req, res);
+});
+
 
 module.exports = router;

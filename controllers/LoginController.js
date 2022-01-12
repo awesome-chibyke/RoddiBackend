@@ -39,6 +39,8 @@ class LoginController {
     let email = req.body.email;
     let password = req.body.password;
 
+    let IpInformation = await this.User.returnIpDetails(req); return res.json(IpInformation);
+
     //check for the existence of the values
     let messageType = "";
 
@@ -120,6 +122,8 @@ class LoginController {
         this.responseObject.setStatus(true);
         this.responseObject.setData({
           email: user.email,
+          email_verification:user.email_verification,
+          status:user.status
         });
       } else {
         //google auth
@@ -131,6 +135,8 @@ class LoginController {
         this.responseObject.setStatus(true);
         this.responseObject.setData({
           email: user.email,
+          email_verification:user.email_verification,
+          status:user.status,
           token_type: this.AuthenticationCode.login_auth_type,
         });
       }
@@ -315,7 +321,7 @@ class LoginController {
         "A login authentication code was sent to your email address, please provide code to proceed with login";
       if (userObject.phone_verification !== null) {
         //send the code to the user phone number
-        let sendSms = await this.SendLoginAuthSms.sendPhone(user, token);
+        let sendSms = await this.SendLoginAuthSms.sendPhone(userObject, token);
         successMessage =
           "A login authentication code was sent to your email address and phone number, please provide code to proceed with login";
       } //...........................

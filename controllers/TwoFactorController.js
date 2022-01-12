@@ -48,14 +48,17 @@ class TwoFactorController {
         throw new Error(ErrorMessage);
       }
 
+      if(userObject.phone_verification === null){
+        throw new Error('Please verify your phone number and profile, before you can activate two factor authentication on your account');
+      }
+
       let settings = await this.Settings.selectSettings([["id", "=", 1]]);
       if (settings === false) {
         throw new Error("Settings can not be accessed at this time");
       }
 
       //create the secret for the transaction
-      let fullName = this.User.returnFullName(userObject);
-      var secret = speakeasy.generateSecret({ name: settings.site_name+' ('+fullName+')' });
+      var secret = speakeasy.generateSecret({ name: settings.site_name+' ('+userObject.email+')' });
 
       // Example for storing the secret key somewhere (varies by implementation):
       let two_factor_temp_secret = secret.base32;
@@ -71,6 +74,9 @@ class TwoFactorController {
         // Display this data URL to the user in an <img> tag
         // Example:
         //write('<img src="' + data_url + '">');
+
+
+
         res.status(200).json({
           status: true,
           message: "Token was successfully created",
@@ -93,9 +99,6 @@ class TwoFactorController {
       //authenticate user
       let userObject = await authData(req);
 
-      //get the token from the request body
-      let tokenSupplied = req.body.token;
-
       //select the temporal key that was saved for  the two factor
       //select the user involved
       let selectedUserObject = await this.User.selectOneUser([
@@ -105,6 +108,9 @@ class TwoFactorController {
         let errorMessage = this.ErrorMessages.ErrorMessageObjects.authentication_failed
         throw new Error(errorMessage);
       }
+
+      //get the token from the request body
+      let tokenSupplied = req.body.token;
       let base32secret = selectedUserObject.two_factor_temp_secret;
 
       //check the token supplied to make sure its validate
@@ -184,6 +190,10 @@ class TwoFactorController {
         throw new Error(errorMessage);
       }
 
+      if(userObject.auth_type !== 'google_auth'){//make sure user enabled the two factor auth
+        throw new Error('Two-Factor Authentication is not enabled on your account');
+      }
+
       let verifyUser = await this.User.verifyAToken(req, userObject);
       if (verifyUser.status === false) {
         throw new Error(verifyUser.message);
@@ -192,7 +202,7 @@ class TwoFactorController {
       //disable the two factor authentication and remove authentication from user account
       let updateUserObject = await this.User.updateUser({
             unique_id:userObject.unique_id,
-            auth_type:null,
+            auth_type:'email',
           two_factor_temp_secret:null,
           two_factor_secret:null
       });
@@ -355,10 +365,11 @@ class TwoFactorController {
 
       let phone = Number(req.body.phone);
       let email = req.body.email;
-      let country_code = req.body.country_code;
+      let country_code = '+'+req.body.country_code;
+      country_code = country_code.includes('+') ? country_code : '+'+country_code.trim();
 
-      //select the user involved
-      let userObject = await this.User.selectOneUser([["email", "=", email], ['phone', '=', phone], ['country_code', '=', country_code]]);
+      //select the user involved , ['country_code', '=', country_code]
+      let userObject = await this.User.selectOneUser([["email", "=", email], ['phone', '=', phone]]);
       if (userObject === false) {
         let errorMessage = this.ErrorMessages.ErrorMessageObjects.invalid_user
         throw new Error(errorMessage);
@@ -439,8 +450,8 @@ class TwoFactorController {
       let email = req.body.email;
       let country_code = req.body.country_code;
 
-      //select the user involved
-      let userObject = await this.User.selectOneUser([["email", "=", email], ["phone", "=", phone], ["country_code", "=", country_code]]);
+      //select the user involved , ["country_code", "=", country_code]
+      let userObject = await this.User.selectOneUser([["email", "=", email], ["phone", "=", phone] ]);
       if (userObject === false) {
         let errorMessage = this.ErrorMessages.ErrorMessageObjects.invalid_user
         throw new Error(errorMessage);

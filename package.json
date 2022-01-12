@@ -12,6 +12,7 @@
   "dependencies": {
     "@vonage/server-sdk": "^2.10.8",
     "axios": "^0.21.1",
+    "b64-to-blob": "^1.2.19",
     "bcrypt": "^5.0.1",
     "cors": "^2.8.5",
     "date-and-time": "^1.0.0",

@@ -20,10 +20,6 @@ router.get("/", async (req, res) => {
     return res.json('it worked')
 });
 
-//return the user object
-router.get("/get_settings", async (req, res) => {
-    SettingsController.selectSettings(req, res);
-});
 
 module.exports = router;
 //selectAllPrivileges

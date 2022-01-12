@@ -36,10 +36,10 @@ class SettingsController {
         preferred_currency: "required|string",
         site_name: "required|string",
         address1: "required|string",
-        address2: "required|string",
-        address3: "required|string",
-        address4: "required|string",
-        email: "required|string",
+        address2: "string",
+        address3: "string",
+        address4: "string",
+        email1: "required|string|email",
         email2: "required|string",
         site_url: "required|string",
         logo_url: "required|string",
@@ -52,7 +52,7 @@ class SettingsController {
         android_url: "required|string",
         slogan: "required|string",
         front_end_base_url: "required|string",
-        back_end_base_url: "required|string",
+        backend_base_url: "required|string",
         ios_app_store_link: "required|string",
         phone1: "required|numeric",
         phone2: "required|numeric",
@@ -77,7 +77,7 @@ class SettingsController {
       }
 
       //check privilege
-      let privilege = await this.Privileges.checkUserPrivilege(loggedUser, 'manage_roles');
+      let privilege = await this.Privileges.checkUserPrivilege(userObject, 'manage_roles');
       if(privilege === false){ throw new Error('Access Denied')}
 
       //update the settings
@@ -103,7 +103,7 @@ class SettingsController {
       const android_url = req.body.android_url;
       const slogan = req.body.slogan;
       const front_end_base_url = req.body.front_end_base_url;
-      const back_end_base_url = req.body.back_end_base_url;
+      const backend_base_url = req.body.backend_base_url;
       const ios_app_store_link = req.body.ios_app_store_link;
 
       let updatedSettingsObject = await this.Settings.updateSettings({
@@ -111,9 +111,9 @@ class SettingsController {
         site_name: site_name,
         address1: address1,
         address2: address2,
-        address3: address3,
+        address_3: address3,
         address4: address4,
-        email: email,
+        email1: email,
         email2: email2,
         site_url: site_url,
         logo_url: logo_url,
@@ -129,14 +129,14 @@ class SettingsController {
         android_url: android_url,
         slogan: slogan,
         front_end_base_url: front_end_base_url,
-        back_end_base_url: back_end_base_url,
+          backend_base_url: backend_base_url,
         ios_app_store_link: ios_app_store_link,
       });
 
       //return value to view
       this.responseObject.setStatus(true);
       this.responseObject.setData({ updatedSettingsObject });
-      this.responseObject.setMessage("Settings was sucessfully updated");
+      this.responseObject.setMessage("Settings was successfully updated");
       res.json(this.responseObject.sendToView());
     } catch (e) {
       this.responseObject.setStatus(false);

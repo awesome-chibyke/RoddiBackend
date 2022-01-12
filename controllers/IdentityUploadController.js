@@ -81,9 +81,9 @@ class IdentityUploadController {
                 throw new Error(ErrorMessage);
             }
 
-            if(userObject.face_upload_status === 'none'){
+            /*if(userObject.face_upload_status === 'none'){
                 throw new Error('Please carry out your face verification step first');
-              }
+            }*/
 
             if(userObject.id_upload_status === this.AccountVerificationLevels.id_upload_pending){
                 //unlink the files

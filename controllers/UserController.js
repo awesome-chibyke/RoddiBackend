@@ -54,7 +54,7 @@ class UserController {
 
       //confirm the user account
       let currenctDate = date.format(this.now, "YYYY-MM-DD HH:mm:ss");
-      await this.User.updateUser({
+      let updatedUserDetails = await this.User.updateUser({
         unique_id: userObject.unique_id,
         email_verification: currenctDate,
         updated_at: currenctDate,
@@ -79,7 +79,7 @@ class UserController {
 
         this.responseObject.setMesageType("normal");
         //delete the properties that is not supposed t be sent to view
-        let userObjectForView = await this.User.returnUserForView(userObject);
+        let userObjectForView = await this.User.returnUserForView(updatedUserDetails);
         this.responseObject.setData({
             token: createdToken,
             user: userObjectForView,
