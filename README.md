@@ -16,10 +16,3 @@ https://github.com/mikeerickson/validatorjs
 
 //..............more on knejs
 https://gist.github.com/NigelEarle/70db130cc040cc2868555b29a0278261
-
-
-twilio recovery code:aiJbjyDSK9BRbU1AMktSuMr3T-KAlaNXNapfr392
-
-
-TWILIO_ACCOUNT_SID=AC398bd8fc6f12f16eb4b49989e7423cf8
-TWILIO_AUTH_TOKEN=301399ebfaf4c7e0d240283131ba0e9b
